@@ -11,6 +11,8 @@ const C = {
   blueMid: "#a8d4ef",
   navy: "#0d1f35",
   navyMid: "#1a3550",
+  red: "#FF0000",
+  redLight: "#ffe0e0",
   pink: "#E5007D",
   pinkLight: "#fad0e8",
   text: "#0d1f35",
@@ -411,7 +413,7 @@ async function exportPDF(results, persona, topic, summary, avgNps, sentimentCoun
   pdfCounts.forEach((count, sc) => {
     if (count === 0) return;
     const bw = Math.max(2, (count / pdfMax) * barMaxW);
-    const bColor = sc >= 8 ? [22, 163, 74] : sc >= 4 ? [217, 119, 6] : [229, 0, 125];
+    const bColor = sc >= 8 ? [22, 163, 74] : sc >= 4 ? [251, 191, 36] : [255, 0, 0];
     doc.setFillColor(...bColor);
     doc.rect(M + 18, y, bw, 5, "F");
     doc.setFontSize(8); doc.setTextColor(...bColor); doc.setFont("helvetica", "bold");
@@ -430,7 +432,7 @@ async function exportPDF(results, persona, topic, summary, avgNps, sentimentCoun
     if (y > 265) { doc.addPage(); y = 20; }
     doc.setFillColor(0, 130, 200, 0.08);
     doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 130, 200);
-    doc.text(`Respondent #${r.id}  ·  Score ${r.nps}/10  ·  ${r.sentiment}`, M, y); y += 5;
+    doc.setTextColor(r.nps >= 8 ? 22 : r.nps >= 4 ? 217 : 255, r.nps >= 8 ? 163 : r.nps >= 4 ? 119 : 0, r.nps >= 8 ? 74 : r.nps >= 4 ? 6 : 0); doc.text(`Respondent #${r.id}  ·  Score ${r.nps}/10  ·  ${r.sentiment}`, M, y); doc.setTextColor(13, 31, 53); y += 5;
     (r.answers || []).forEach(a => {
       doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(13, 31, 53);
       const qLines = doc.splitTextToSize(a.question, W - M * 2 - 4); doc.text(qLines, M + 4, y); y += qLines.length * 4 + 1;
@@ -466,7 +468,7 @@ async function exportPPTX(results, persona, topic, summary, avgNps, sentimentCou
 
   const W = 10, H = 5.625;
   const navy = "0D1F35", blue = "0082C8", white = "FFFFFF", lightBg = "F5F8FC", textMid = "4A5568", lightBlue = "E8F4FC";
-  const green = "16A34A", yellow = "FBBF24", pink = "E5007D", grey = "8A9BB0";
+  const green = "16A34A", yellow = "FBBF24", pink = "FF0000", grey = "8A9BB0";
 
   // ── Slide 1: Titelfolie ──────────────────────────────────────────────────────
   let s = pptx.addSlide();
@@ -806,12 +808,25 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
         const sd = await sumResp.json();
         const rawText = sd.content?.find(c => c.type === "text")?.text || "{}";
         try {
-          const parsed = JSON.parse(rawText.replace(/```json|```/g, "").trim());
-          setSummary(parsed.summary || "");
-          setSpiderData(parsed.spider || null);
-          setTopWords(parsed.topWords || []);
+          // Try to extract JSON from the response
+          const cleaned = rawText.replace(/```json|```/g, "").trim();
+          // Find first { and last }
+          const jsonStart = cleaned.indexOf("{");
+          const jsonEnd = cleaned.lastIndexOf("}");
+          if (jsonStart > -1 && jsonEnd > jsonStart) {
+            const parsed = JSON.parse(cleaned.substring(jsonStart, jsonEnd + 1));
+            setSummary(parsed.summary || cleaned);
+            setSpiderData(parsed.spider || null);
+            setTopWords(parsed.topWords || []);
+          } else {
+            setSummary(cleaned);
+            setSpiderData(null);
+            setTopWords([]);
+          }
         } catch {
-          setSummary(rawText);
+          // If JSON parsing fails, show the text as-is but strip any JSON artifacts
+          const fallback = rawText.replace(/[{}"]/g, "").replace(/summary:|spider:|topWords:|dimensions:|scores:/g, "").trim();
+          setSummary(fallback);
           setSpiderData(null);
           setTopWords([]);
         }
@@ -824,8 +839,8 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
   const sentimentCounts = results.reduce((a, r) => { a[r.sentiment] = (a[r.sentiment] || 0) + 1; return a; }, {});
   const validQs = questions.filter(q => q.trim());
 
-  const sentColor = s => s === "positiv" ? C.green : s === "negativ" ? C.pink : C.amber;
-  const sentBg = s => s === "positiv" ? C.greenLight : s === "negativ" ? C.pinkLight : C.amberLight;
+  const sentColor = s => s === "positiv" ? C.green : s === "negativ" ? C.red : C.amber;
+  const sentBg = s => s === "positiv" ? C.greenLight : s === "negativ" ? C.redLight : C.amberLight;
 
   const handleExport = async (type) => {
     setExporting(type);
@@ -1477,10 +1492,10 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
         {/* ── STEP 3: Untersuchungsgegenstand ── */}
         {step === 3 && (
           <div>
-            <StepHeader num={4} title="Untersuchungsgegenstand" subtitle="Was genau soll untersucht werden?" accent={C.pink} />
+            <StepHeader num={4} title="Untersuchungsgegenstand" subtitle="Was genau soll untersucht werden?" accent={C.red} />
             <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: "24px 28px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
               <div style={{ display: "flex", gap: 12, marginBottom: 20, padding: "10px 14px", background: C.bgSoft, borderRadius: 8, border: `1px solid ${C.borderLight}`, flexWrap: "wrap", alignItems: "center" }}>
-                <span style={{ fontSize: 11, color: C.pink, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{themaKategorie}</span>
+                <span style={{ fontSize: 11, color: C.red, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{themaKategorie}</span>
                 <span style={{ color: C.borderLight }}>·</span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>{auftraggeber.name}</span>
                 <span style={{ fontSize: 12, color: C.textMid }}>· {persona.label}</span>
@@ -1490,13 +1505,13 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                   <Label>Name / Bezeichnung *</Label>
                   <input value={gegenstand.name} onChange={e => setGegenstand({ ...gegenstand, name: e.target.value })}
                     placeholder={themaKategorie === "Produkttest" ? "z.B. Interliving Sofa Modell 6601" : themaKategorie === "Markenwahrnehmung" ? "z.B. Marke Trendhopper" : themaKategorie === "Kommunikationstest (Werbung, Kampagne)" ? "z.B. TV-Spot Frühjahr 2026" : "z.B. Neues Sortiment Wohnen 2026"}
-                    style={inputStyle(C.pink)} />
+                    style={inputStyle(C.red)} />
                 </div>
                 <div style={{ gridColumn: "1 / -1" }}>
                   <Label>Beschreibung</Label>
                   <textarea value={gegenstand.beschreibung} onChange={e => setGegenstand({ ...gegenstand, beschreibung: e.target.value })}
                     placeholder="Beschreibe den Gegenstand so, wie ihn die Persona kennenlernen soll — Materialien, Eigenschaften, Besonderheiten, Positionierung…"
-                    rows={5} style={{ ...inputStyle(C.pink), resize: "vertical", lineHeight: 1.6 }} />
+                    rows={5} style={{ ...inputStyle(C.red), resize: "vertical", lineHeight: 1.6 }} />
                 </div>
                 <div style={{ gridColumn: "1 / -1" }}>
                   <Label>Bilder hochladen (optional)</Label>
@@ -1506,7 +1521,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                   <div style={{ gridColumn: "1 / -1" }}>
                     <Label>Preis (optional)</Label>
                     <input value={gegenstand.preis} onChange={e => setGegenstand({ ...gegenstand, preis: e.target.value })}
-                      placeholder="z.B. 899 €" style={inputStyle(C.pink)} />
+                      placeholder="z.B. 899 €" style={inputStyle(C.red)} />
                   </div>
                 )}
               </div>
@@ -1569,7 +1584,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
         {/* ── STEP 4: Simulation ── */}
         {step === 5 && (
           <div>
-            <StepHeader num={6} title="Simulation starten" subtitle="Die KI befragt jetzt die synthetischen Respondenten deiner Zielgruppe." accent={C.pink} />
+            <StepHeader num={6} title="Simulation starten" subtitle="Die KI befragt jetzt die synthetischen Respondenten deiner Zielgruppe." accent={C.red} />
 
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${persona.alter ? 5 : 4},1fr)`, gap: 14, marginBottom: 28 }}>
               {[
@@ -1644,7 +1659,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                 <div style={{ marginTop: 10, fontSize: 12, color: C.textLight }}>Startet {sampleSize} parallele KI-Befragungen</div>
               </div>
             )}
-            {error && <div style={{ color: C.pink, padding: "14px 18px", border: `1px solid ${C.pink}30`, borderRadius: 8, fontSize: 13, background: C.pinkLight }}>{error}</div>}
+            {error && <div style={{ color: C.red, padding: "14px 18px", border: `1px solid ${C.red}30`, borderRadius: 8, fontSize: 13, background: C.redLight }}>{error}</div>}
           </div>
         )}
 
@@ -1668,7 +1683,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                   <div style={{ fontSize: 14, color: C.blue, fontWeight: 700 }}>{results.length} / {sampleSize}</div>
                 </div>
                 <div style={{ height: 8, background: "#1a3550", borderRadius: 4, overflow: "hidden", marginBottom: 20 }}>
-                  <div style={{ height: "100%", width: `${smoothProgress}%`, background: `linear-gradient(90deg, ${C.blue}, ${C.pink})`, borderRadius: 4, transition: "width 0.08s linear", boxShadow: `0 0 12px ${C.blue}80` }} />
+                  <div style={{ height: "100%", width: `${smoothProgress}%`, background: `linear-gradient(90deg, ${C.blue}, ${C.red})`, borderRadius: 4, transition: "width 0.08s linear", boxShadow: `0 0 12px ${C.blue}80` }} />
                 </div>
                 {results.slice(-3).map((r, i) => (
                   <div key={i} style={{ padding: "10px 16px", background: "rgba(255,255,255,0.05)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)", display: "flex", gap: 12, alignItems: "center", fontSize: 13, marginBottom: 6 }}>
@@ -1715,7 +1730,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                   <KpiCard label="Ø Bewertung" value={avgNps} unit="/10" color={C.blue} bg={C.blueLight} border={`${C.blue}30`} />
                   <KpiCard label="Positiv" value={sentimentCounts["positiv"] || 0} unit={`/${results.length}`} color={C.green} bg={C.greenLight} border="#16a34a30" />
                   <KpiCard label="Neutral" value={sentimentCounts["neutral"] || 0} unit={`/${results.length}`} color={C.amber} bg={C.amberLight} border="#d9770630" />
-                  <KpiCard label="Negativ" value={sentimentCounts["negativ"] || 0} unit={`/${results.length}`} color={C.pink} bg={C.pinkLight} border={`${C.pink}30`} />
+                  <KpiCard label="Negativ" value={sentimentCounts["negativ"] || 0} unit={`/${results.length}`} color={C.red} bg={C.redLight} border={`${C.red}30`} />
                 </div>
 
                 {/* Score-Visualisierung */}
@@ -1726,7 +1741,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                       <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <div style={{ fontSize: 11, color: C.textLight, minWidth: 72 }}>#{r.id} · {r.sentiment.slice(0,3)}</div>
                         <div style={{ flex: 1, height: 10, background: C.borderLight, borderRadius: 5, overflow: "hidden" }}>
-                          <div style={{ height: "100%", width: `${r.nps * 10}%`, borderRadius: 5, background: r.nps >= 8 ? C.green : r.nps >= 4 ? C.amber : C.pink, transition: "width 1s ease" }} />
+                          <div style={{ height: "100%", width: `${r.nps * 10}%`, borderRadius: 5, background: r.nps >= 8 ? C.green : r.nps >= 4 ? C.amber : C.red, transition: "width 1s ease" }} />
                         </div>
                         <div style={{ fontSize: 11, fontWeight: 700, color: C.text, minWidth: 36, textAlign: "right" }}>{r.nps}/10</div>
                       </div>
@@ -1759,7 +1774,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                         const count = results.filter(r => r.nps === score).length;
                         const maxCount = Math.max(...[...Array(11)].map((_, s) => results.filter(r => r.nps === s).length), 1);
                         const height = count > 0 ? Math.max(8, (count / maxCount) * 90) : 0;
-                        const color = score >= 8 ? C.green : score >= 4 ? C.amber : C.pink;
+                        const color = score >= 8 ? C.green : score >= 4 ? C.amber : C.red;
                         return (
                           <div key={score} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
                             {count > 0 && <div style={{ fontSize: 9, color: C.textLight, fontWeight: 600 }}>{count}</div>}
@@ -1770,7 +1785,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                       })}
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: C.textLight, marginTop: 4 }}>
-                      <span style={{ color: C.pink }}>● Kritisch (1–3)</span>
+                      <span style={{ color: C.red }}>● Kritisch (1–3)</span>
                       <span style={{ color: C.amber }}>● Neutral (4–7)</span>
                       <span style={{ color: C.green }}>● Positiv (8–10)</span>
                     </div>
@@ -1956,13 +1971,13 @@ function ImageDropZone({ bilder, onChange }) {
         onDragLeave={() => setDragging(false)}
         onDrop={e => { e.preventDefault(); setDragging(false); processFiles(e.dataTransfer.files); }}
         style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6,
-          padding: "18px 14px", border: `2px dashed ${dragging ? C.pink : bilder.length > 0 ? C.pink : C.border}`,
-          borderRadius: 8, cursor: "pointer", background: dragging ? C.pinkLight : bilder.length > 0 ? C.pinkLight : C.bgSoft,
+          padding: "18px 14px", border: `2px dashed ${dragging ? C.red : bilder.length > 0 ? C.red : C.border}`,
+          borderRadius: 8, cursor: "pointer", background: dragging ? C.redLight : bilder.length > 0 ? C.redLight : C.bgSoft,
           transition: "all 0.15s", minHeight: 80 }}>
         <input type="file" accept="image/*" multiple style={{ display: "none" }}
           onChange={e => processFiles(e.target.files)} />
         <span style={{ fontSize: 22 }}>{dragging ? "📂" : "🖼"}</span>
-        <span style={{ fontSize: 12, color: bilder.length > 0 ? C.pink : C.textMid, textAlign: "center" }}>
+        <span style={{ fontSize: 12, color: bilder.length > 0 ? C.red : C.textMid, textAlign: "center" }}>
           {bilder.length > 0
             ? `${bilder.length} Bild${bilder.length > 1 ? "er" : ""} geladen`
             : dragging ? "Loslassen zum Hochladen" : "Bilder hierher ziehen oder klicken"}
@@ -1974,7 +1989,7 @@ function ImageDropZone({ bilder, onChange }) {
             <div key={i} style={{ position: "relative" }}>
               <img src={img.data} alt={img.name} style={{ width: 64, height: 64, objectFit: "cover", borderRadius: 6, border: `1px solid ${C.border}` }} />
               <button onClick={() => onChange(bilder.filter((_, j) => j !== i))}
-                style={{ position: "absolute", top: -6, right: -6, background: C.pink, border: "none", borderRadius: "50%", width: 18, height: 18, color: "#fff", cursor: "pointer", fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                style={{ position: "absolute", top: -6, right: -6, background: C.red, border: "none", borderRadius: "50%", width: 18, height: 18, color: "#fff", cursor: "pointer", fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
             </div>
           ))}
         </div>
