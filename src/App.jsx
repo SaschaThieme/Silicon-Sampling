@@ -541,7 +541,7 @@ export default function SiliconSamplingApp() {
   // ── Auftraggeber ──
   const [auftraggeber, setAuftraggeber] = useState({ ...EMPTY_AUFTRAGGEBER });
   const [savedAuftraggeber, setSavedAuftraggeber] = useState([]);
-  const [auftraggeberMode, setAuftraggeberMode] = useState("select");
+  const [auftraggeberMode, setAuftraggeberMode] = useState("create");
 
   const [personaType, setPersonaType] = useState("b2c"); // "b2c" | "b2b"
   const EMPTY_PERSONA = personaType === "b2c" ? EMPTY_PERSONA_B2C : EMPTY_PERSONA_B2B;
@@ -558,7 +558,11 @@ export default function SiliconSamplingApp() {
     (async () => {
       try {
         const result = await window.storage.get("auftraggeber-library");
-        if (result?.value) setSavedAuftraggeber(JSON.parse(result.value));
+        if (result?.value) {
+          const saved = JSON.parse(result.value);
+          setSavedAuftraggeber(saved);
+          if (saved.length > 0) setAuftraggeberMode("select");
+        }
       } catch {}
       try {
         const result = await window.storage.get("personas-library");
@@ -845,7 +849,7 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
                     ))}
                   </div>
                 ) : (
-                  <div style={{ padding: "32px 0", textAlign: "center", color: C.textLight, fontSize: 13 }}>
+                  <div style={{ padding: "24px 0", color: C.textLight, fontSize: 13 }}>
                     Noch kein Auftraggeber angelegt.
                     <br />
                     <button onClick={() => setAuftraggeberMode("create")} style={{ marginTop: 12, padding: "9px 20px", borderRadius: 8, border: `1px solid ${C.blue}`, background: C.blueLight, color: C.blue, cursor: "pointer", fontSize: 13, fontFamily: "inherit", fontWeight: 600 }}>+ Auftraggeber anlegen</button>
@@ -1562,7 +1566,7 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
             </div>
 
             {!simulating && results.length === 0 && !error && (
-              <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <div style={{ padding: "40px 0" }}>
                 <button onClick={() => { runSimulation(); setStep(6); }} style={{
                   background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`,
                   border: "none", color: "#fff", padding: "15px 48px", borderRadius: 8,
