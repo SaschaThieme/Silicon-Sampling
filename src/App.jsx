@@ -526,17 +526,20 @@ async function exportPPTX(results, persona, topic, summary, avgNps, sentimentCou
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
+const EMPTY_AUFTRAGGEBER = { name: "", branche: "", url: "", beschreibung: "" };
+const EMPTY_PERSONA_B2C = { label: "", alter: "", einkommen: "", bildung: "", region: "", haushaltstyp: "", werte: [], lebensstil: [], kaufverhalten: [], bevoelkerung: "" };
+const EMPTY_PERSONA_B2B = { label: "", type: "b2b", branche: "", mitarbeiter: "", umsatz: "", region: "", strategischeAusrichtung: "", buyingCenterRolle: [], hierarchie: "", budget: "", kaufverhalten: [], preisorientierung: "", anbieterloyalitaet: "", informationsquellen: [], onlineAffinitaet: "" };
+const EMPTY_GEGENSTAND = { name: "", beschreibung: "", preis: "", bilder: [] };
+
+
 export default function SiliconSamplingApp() {
   const [step, setStep] = useState(0);
 
   // ── Auftraggeber ──
-  const EMPTY_AUFTRAGGEBER = { name: "", branche: "", url: "", beschreibung: "" };
   const [auftraggeber, setAuftraggeber] = useState({ ...EMPTY_AUFTRAGGEBER });
   const [savedAuftraggeber, setSavedAuftraggeber] = useState([]);
   const [auftraggeberMode, setAuftraggeberMode] = useState("select");
 
-  const EMPTY_PERSONA_B2C = { label: "", alter: "", einkommen: "", bildung: "", region: "", haushaltstyp: "", werte: [], lebensstil: [], kaufverhalten: [], bevoelkerung: "" };
-  const EMPTY_PERSONA_B2B = { label: "", type: "b2b", branche: "", mitarbeiter: "", umsatz: "", region: "", strategischeAusrichtung: "", buyingCenterRolle: [], hierarchie: "", budget: "", kaufverhalten: [], preisorientierung: "", anbieterloyalitaet: "", informationsquellen: [], onlineAffinitaet: "" };
   const [personaType, setPersonaType] = useState("b2c"); // "b2c" | "b2b"
   const EMPTY_PERSONA = personaType === "b2c" ? EMPTY_PERSONA_B2C : EMPTY_PERSONA_B2B;
   const [persona, setPersona] = useState({ ...EMPTY_PERSONA_B2C });
@@ -624,7 +627,6 @@ export default function SiliconSamplingApp() {
   };
   const [topic, setTopic] = useState("");
   const [themaKategorie, setThemaKategorie] = useState("");
-  const EMPTY_GEGENSTAND = { name: "", beschreibung: "", preis: "", bilder: [] };
   const [gegenstand, setGegenstand] = useState({ ...EMPTY_GEGENSTAND });
   const [questions, setQuestions] = useState([""]);
   const [sampleSize, setSampleSize] = useState(8);
@@ -1706,7 +1708,7 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
                 </div>
 
                 <div style={{ marginTop: 28, display: "flex", gap: 10 }}>
-                  <button onClick={() => { setStep(0); setResults([]); setSummary(""); setProgress(0); setPersona(personaType === "b2b" ? { ...EMPTY_PERSONA_B2B } : { ...EMPTY_PERSONA_B2C }); setTopic(""); setQuestions([""]); setPersonaMode("select"); setAuftraggeber({ ...EMPTY_AUFTRAGGEBER }); setAuftraggeberMode("select"); setGegenstand({ name: "", beschreibung: "", preis: "", bilder: [] }); }}
+                  <button onClick={() => { setStep(0); setResults([]); setSummary(""); setProgress(0); setPersona(personaType === "b2b" ? { ...EMPTY_PERSONA_B2B } : { ...EMPTY_PERSONA_B2C }); setTopic(""); setQuestions([""]); setPersonaMode("select"); setAuftraggeber({ ...EMPTY_AUFTRAGGEBER }); setAuftraggeberMode("select"); setGegenstand({ ...EMPTY_GEGENSTAND }); }}
                     style={{ padding: "11px 24px", borderRadius: 8, border: `1px solid ${C.border}`, background: C.bg, color: C.textMid, cursor: "pointer", fontSize: 13, fontFamily: "inherit", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
                     ↺ Neue Studie starten
                   </button>
