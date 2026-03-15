@@ -719,7 +719,7 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
         const cur = Math.min(batchSize, total - b * batchSize);
         const batch = await Promise.all(Array.from({ length: cur }, async (_, i) => {
           const id = b * batchSize + i + 1;
-          const resp = await fetch("https://api.anthropic.com/v1/messages", {
+          const resp = await fetch("/api/anthropic", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system: buildPrompt(id),
               messages: [{ role: "user", content: `Befragung ${id}/${total}:\n${validQs.map((q, qi) => `F${qi + 1}: ${q}`).join("\n")}` }] }),
@@ -744,7 +744,7 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
         const allAnswers = collected.map(r =>
           `Person ${r.id} (NPS: ${r.nps}, ${r.sentiment}):\n` + (r.answers || []).map(a => `  Q: ${a.question}\n  A: ${a.answer}`).join("\n")
         ).join("\n\n");
-        const sumResp = await fetch("https://api.anthropic.com/v1/messages", {
+        const sumResp = await fetch("/api/anthropic", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000,
             messages: [{ role: "user", content: `Marktforschungsexperte bei Unternehmensberatung. Analysiere diese Befragungsergebnisse, erstelle Executive Summary (max. 180 Wörter, Deutsch). Struktur: 1) Kernerkenntnisse, 2) Auffälligkeiten, 3) Handlungsempfehlungen.\n\nAuftraggeber: ${auftraggeber.name}\nThema: ${themaKategorie}\nGegenstand: ${gegenstand.name || topic}\nPersona: ${persona.label}\n\n${allAnswers}` }] }),
