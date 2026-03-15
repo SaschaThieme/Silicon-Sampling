@@ -592,6 +592,10 @@ export default function SiliconSamplingApp() {
     try { await window.storage.set("hidden-presets", JSON.stringify(updated)); } catch {}
   };
 
+  const [simulating, setSimulating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [smoothProgress, setSmoothProgress] = useState(0);
+
   // Smooth progress animation
   useEffect(() => {
     if (!simulating) { setSmoothProgress(0); return; }
@@ -633,9 +637,6 @@ export default function SiliconSamplingApp() {
   const [gegenstand, setGegenstand] = useState({ ...EMPTY_GEGENSTAND });
   const [questions, setQuestions] = useState([""]);
   const [sampleSize, setSampleSize] = useState(8);
-  const [simulating, setSimulating] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [smoothProgress, setSmoothProgress] = useState(0);
   const [results, setResults] = useState([]);
   const [summary, setSummary] = useState("");
   const [loadingSummary, setLoadingSummary] = useState(false);
