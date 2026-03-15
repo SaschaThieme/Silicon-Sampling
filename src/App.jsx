@@ -398,6 +398,27 @@ async function exportPDF(results, persona, topic, summary, avgNps, sentimentCoun
     y += 2;
   }
 
+  // Score-Verteilung
+  blueLine();
+  label("Score-Verteilung");
+  const pdfCounts = [...Array(11)].map((_, sc) => results.filter(r => r.nps === sc).length);
+  const pdfMax = Math.max(...pdfCounts, 1);
+  const barMaxW = W - M * 2 - 20;
+  pdfCounts.forEach((count, sc) => {
+    if (count === 0) return;
+    const bw = Math.max(2, (count / pdfMax) * barMaxW);
+    const bColor = sc >= 8 ? [22, 163, 74] : sc >= 4 ? [217, 119, 6] : [229, 0, 125];
+    doc.setFillColor(...bColor);
+    doc.rect(M + 18, y, bw, 5, "F");
+    doc.setFontSize(8); doc.setTextColor(...bColor); doc.setFont("helvetica", "bold");
+    doc.text(`${sc}`, M + 14, y + 4, { align: "right" });
+    doc.setTextColor(13, 31, 53); doc.setFont("helvetica", "normal");
+    doc.text(`${count}×`, M + 20 + bw, y + 4);
+    y += 7;
+    if (y > 265) { doc.addPage(); y = 20; }
+  });
+  y += 4;
+
   // Individual results
   blueLine();
   label(`Einzelantworten (${results.length} Respondenten)`);
@@ -468,15 +489,28 @@ async function exportPPTX(results, persona, topic, summary, avgNps, sentimentCou
     s.addText(k.label.toUpperCase(), { x, y: 2.05, w: 2.2, h: 0.35, fontSize: 8, color: "8A9BB0", fontFace: "Arial", align: "center", bold: true });
   });
 
-  // NPS bar chart
-  s.addText("BEWERTUNGSVERTEILUNG", { x: 0.4, y: 2.85, w: 9, h: 0.3, fontSize: 8, color: "8A9BB0", bold: true, fontFace: "Arial" });
-  const maxNps = Math.max(...results.map(r => r.nps), 1);
-  results.forEach((r, i) => {
-    const bw = (r.nps / 10) * 8.8;
-    s.addShape(pptx.ShapeType.rect, { x: 0.4, y: 3.2 + i * 0.28, w: bw, h: 0.2, fill: { color: blue } });
-    s.addText(`#${r.id} Score ${r.nps}`, { x: 0.4, y: 3.2 + i * 0.28, w: 2, h: 0.2, fontSize: 7, color: white, fontFace: "Arial" });
-    if (3.2 + i * 0.28 > 6.8) return;
+  // Score-Verteilung — Säulendiagramm mit Grundlinie
+  s.addText("SCORE-VERTEILUNG", { x: 0.4, y: 2.85, w: 9, h: 0.3, fontSize: 8, color: "8A9BB0", bold: true, fontFace: "Arial" });
+  const baselineY = 6.5;
+  const maxBarH = 2.8;
+  const pptxCounts = [...Array(11)].map((_, sc) => results.filter(r => r.nps === sc).length);
+  const pptxMax = Math.max(...pptxCounts, 1);
+  const colW = 0.72;
+  const colGap = 0.15;
+  const chartX = 0.5;
+  // Grundlinie
+  s.addShape(pptx.ShapeType.rect, { x: chartX, y: baselineY, w: (colW + colGap) * 11, h: 0.02, fill: { color: "BBBBBB" } });
+  pptxCounts.forEach((count, sc) => {
+    const x = chartX + sc * (colW + colGap);
+    const h = count > 0 ? Math.max(0.12, (count / pptxMax) * maxBarH) : 0.02;
+    const bColor = sc >= 8 ? "16A34A" : sc >= 4 ? "D97706" : "E5007D";
+    s.addShape(pptx.ShapeType.rect, { x, y: baselineY - h, w: colW, h, fill: { color: count > 0 ? bColor : "EEEEEE" } });
+    if (count > 0) s.addText(`${count}`, { x, y: baselineY - h - 0.22, w: colW, h: 0.2, fontSize: 7, color: bColor, fontFace: "Arial", align: "center", bold: true });
+    s.addText(`${sc}`, { x, y: baselineY + 0.06, w: colW, h: 0.2, fontSize: 7, color: "8A9BB0", fontFace: "Arial", align: "center" });
   });
+  s.addText("● Kritisch (1–3)", { x: 0.4, y: 7.0, w: 2.8, h: 0.2, fontSize: 7, color: "E5007D", fontFace: "Arial" });
+  s.addText("● Neutral (4–7)", { x: 3.4, y: 7.0, w: 2.8, h: 0.2, fontSize: 7, color: "D97706", fontFace: "Arial" });
+  s.addText("● Positiv (8–10)", { x: 6.4, y: 7.0, w: 3, h: 0.2, fontSize: 7, color: "16A34A", fontFace: "Arial" });
 
   // ── Slide 3: Executive Summary ──
   if (summary) {
@@ -1676,7 +1710,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                       <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <div style={{ fontSize: 11, color: C.textLight, minWidth: 72 }}>#{r.id} · {r.sentiment.slice(0,3)}</div>
                         <div style={{ flex: 1, height: 10, background: C.borderLight, borderRadius: 5, overflow: "hidden" }}>
-                          <div style={{ height: "100%", width: `${r.nps * 10}%`, borderRadius: 5, background: r.nps >= 7 ? C.green : r.nps >= 5 ? C.blue : C.pink, transition: "width 1s ease" }} />
+                          <div style={{ height: "100%", width: `${r.nps * 10}%`, borderRadius: 5, background: r.nps >= 8 ? C.green : r.nps >= 4 ? C.amber : C.pink, transition: "width 1s ease" }} />
                         </div>
                         <div style={{ fontSize: 11, fontWeight: 700, color: C.text, minWidth: 36, textAlign: "right" }}>{r.nps}/10</div>
                       </div>
@@ -1709,7 +1743,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                         const count = results.filter(r => r.nps === score).length;
                         const maxCount = Math.max(...[...Array(11)].map((_, s) => results.filter(r => r.nps === s).length), 1);
                         const height = count > 0 ? Math.max(8, (count / maxCount) * 90) : 0;
-                        const color = score >= 8 ? C.green : score >= 5 ? C.blue : C.pink;
+                        const color = score >= 8 ? C.green : score >= 4 ? C.amber : C.pink;
                         return (
                           <div key={score} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
                             {count > 0 && <div style={{ fontSize: 9, color: C.textLight, fontWeight: 600 }}>{count}</div>}
@@ -1720,8 +1754,8 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                       })}
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: C.textLight, marginTop: 4 }}>
-                      <span style={{ color: C.pink }}>● Kritisch (0–4)</span>
-                      <span style={{ color: C.blue }}>● Neutral (5–7)</span>
+                      <span style={{ color: C.pink }}>● Kritisch (1–3)</span>
+                      <span style={{ color: C.amber }}>● Neutral (4–7)</span>
                       <span style={{ color: C.green }}>● Positiv (8–10)</span>
                     </div>
                   </div>
