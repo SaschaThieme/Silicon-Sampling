@@ -88,7 +88,7 @@ const WERTE_CLUSTER = [
   { id: "mut", label: "Mut & Resilienz", color: "#dc2626", bg: "#fde8e8",
     werte: ["Mut", "Tapferkeit", "Entschlossenheit", "Stärke", "Leidenschaft", "Widerstandsfähigkeit", "Überzeugung"] },
   { id: "status", label: "Status & Einfluss", color: "#92400e", bg: "#fef0cc",
-    werte: ["Macht", "Führung", "Einfluss", "Anerkennung", "Reichtum", "Beliebtheit", "Erfolg"] },
+    werte: ["Macht", "Führung", "Einfluss", "Anerkennung", "Reichtum", "Beliebtheit", "Signifikanz"] },
   { id: "pragmatismus", label: "Pragmatismus & Wirtschaftlichkeit", color: "#059669", bg: "#d8f5eb",
     werte: ["Pragmatismus", "Sparsamkeit", "Nützlichkeit", "Wirtschaftlichkeit", "Value for Money", "Vernunft", "Zweckmäßigkeit"] },
 ];
@@ -105,6 +105,9 @@ const LEBENSSTIL_OPTIONS = [
 const HAUSHALTSTYP_OPTIONS = [
   { value: "single", label: "Single", desc: "Lebt allein", Icon: User },
   { value: "paar", label: "Paar / Zusammenlebend", desc: "Ohne Kinder im Haushalt", Icon: Users },
+  { value: "ehepaar", label: "Ehepaar", desc: "Verheiratet, ohne Kinder im Haushalt", Icon: Users },
+  { value: "wg", label: "WG / Zusammenlebend", desc: "Wohngemeinschaft, nicht-romantisch", Icon: Users2 },
+  { value: "alleinerziehend", label: "Alleinerziehend", desc: "Ein Elternteil mit Kind(ern)", Icon: User },
   { value: "familie", label: "Familie mit Kindern", desc: "Kinder im gleichen Haushalt", Icon: Baby },
 ];
 
@@ -135,6 +138,119 @@ const B2B_PREISORIENTIERUNG = ["Preis-sensitiv", "Value-for-Money", "Qualität �
 const B2B_ANBIETERLOYALITAET = ["Sehr loyal (Langzeitverträge)", "Loyal mit Vergleichen", "Wechselbereit bei besserem Angebot", "Aktiv auf Suche nach Alternativen"];
 const B2B_INFORMATIONSQUELLEN = ["Fachmessen & Kongresse", "Fachpresse & Whitepapers", "Peer-Empfehlungen & Netzwerk", "Online-Recherche & Reviews", "Vertriebskontakt direkt", "LinkedIn & Social Selling", "Analysten & Berater (Gartner etc.)"];
 const B2B_ONLINE_AFFINITAET = ["Digital-first (Online-Kanäle bevorzugt)", "Hybrid (Online & Persönlich gemischt)", "Offline-präferiert (Persönliche Meetings)"];
+
+const PERSONA_PRESETS_SINUS = [
+  {
+    label: "Konservativ-Etablierte", sinus: true,
+    alter: "50–70", einkommen: "80.000–180.000 €/Jahr",
+    bildung: "Hochschulabschluss", region: "Deutschland (suburban/ländlich)",
+    haushaltstyp: "ehepaar", geschlecht: [],
+    werte: ["Ordnung", "Tradition", "Pflicht", "Stabilität", "Qualität", "Integrität"],
+    lebensstil: ["Heimorientiert & Gemütlich", "Kulturinteressiert"],
+    kaufverhalten: ["Qualitätsorientiert & Langfristig", "Risikoavers & Markentreu"],
+    bevoelkerung: "10%",
+    milieu: "Konservativ-Etablierte",
+  },
+  {
+    label: "Liberal-Intellektuelle", sinus: true,
+    alter: "40–65", einkommen: "60.000–120.000 €/Jahr",
+    bildung: "Hochschulabschluss", region: "Großstadt",
+    haushaltstyp: "paar", geschlecht: [],
+    werte: ["Freiheit", "Bildung", "Toleranz", "Nachhaltigkeit", "Kreativität", "Gerechtigkeit"],
+    lebensstil: ["Urban & Vernetzt", "Kulturinteressiert", "Nachhaltiger Konsum"],
+    kaufverhalten: ["Recherchestark & Informationsgetrieben", "Nachhaltigkeitsorientiert"],
+    bevoelkerung: "7%",
+    milieu: "Liberal-Intellektuelle",
+  },
+  {
+    label: "Performer", sinus: true,
+    alter: "30–50", einkommen: "80.000–200.000 €/Jahr",
+    bildung: "Hochschulabschluss", region: "Großstadt / Speckgürtel",
+    haushaltstyp: "paar", geschlecht: [],
+    werte: ["Erfolg", "Effizienz", "Innovation", "Leistung", "Freiheit", "Status"],
+    lebensstil: ["Karrierefokussiert", "Digital-First & Convenience", "Reiseaffin & Weltgewandt"],
+    kaufverhalten: ["Statusorientiert & Premium", "Digital-First & Convenience"],
+    bevoelkerung: "8%",
+    milieu: "Performer",
+  },
+  {
+    label: "Expeditive", sinus: true,
+    alter: "20–35", einkommen: "25.000–60.000 €/Jahr",
+    bildung: "Hochschulabschluss", region: "Großstadt",
+    haushaltstyp: "single", geschlecht: [],
+    werte: ["Freiheit", "Originalität", "Selbstverwirklichung", "Innovation", "Abenteuer"],
+    lebensstil: ["Urban & Vernetzt", "Digital & Social-Media-Affin", "Kreativ & Kunstbegeistert"],
+    kaufverhalten: ["Community-Getrieben & Social-Proof", "Digital-First & Convenience"],
+    bevoelkerung: "9%",
+    milieu: "Expeditive",
+  },
+  {
+    label: "Sozialökologische", sinus: true,
+    alter: "35–60", einkommen: "30.000–70.000 €/Jahr",
+    bildung: "Hochschulabschluss", region: "Mittelgroße Stadt",
+    haushaltstyp: "familie", geschlecht: [],
+    werte: ["Nachhaltigkeit", "Gerechtigkeit", "Solidarität", "Gemeinschaft", "Verantwortung"],
+    lebensstil: ["Nachhaltiger Konsum", "Ehrenamt & Gesellschaftliches Engagement", "Kulturinteressiert"],
+    kaufverhalten: ["Nachhaltigkeitsorientiert", "Recherchestark & Informationsgetrieben"],
+    bevoelkerung: "7%",
+    milieu: "Sozialökologische",
+  },
+  {
+    label: "Bürgerliche Mitte", sinus: true,
+    alter: "35–60", einkommen: "35.000–70.000 €/Jahr",
+    bildung: "Mittlere Reife / Realschulabschluss", region: "Mittelgroße Stadt / Suburban",
+    haushaltstyp: "familie", geschlecht: [],
+    werte: ["Sicherheit", "Familie", "Ordnung", "Verlässlichkeit", "Harmonie"],
+    lebensstil: ["Suburban & Familienorientiert", "Heimorientiert & Gemütlich"],
+    kaufverhalten: ["Risikoavers & Markentreu", "Qualitätsorientiert & Langfristig"],
+    bevoelkerung: "13%",
+    milieu: "Bürgerliche Mitte",
+  },
+  {
+    label: "Adaptiv-Pragmatische", sinus: true,
+    alter: "25–45", einkommen: "30.000–65.000 €/Jahr",
+    bildung: "Fachhochschulreife / Abitur", region: "Mittelgroße Stadt",
+    haushaltstyp: "paar", geschlecht: [],
+    werte: ["Pragmatismus", "Flexibilität", "Sicherheit", "Lebensqualität", "Freundschaft"],
+    lebensstil: ["Digital & Social-Media-Affin", "Sportlich & Aktiv", "Genuss & Kulinarik"],
+    kaufverhalten: ["Preissensibel & Schnäppchenjäger", "Digital-First & Convenience"],
+    bevoelkerung: "10%",
+    milieu: "Adaptiv-Pragmatische",
+  },
+  {
+    label: "Traditionelle", sinus: true,
+    alter: "60–80", einkommen: "20.000–40.000 €/Jahr",
+    bildung: "Hauptschulabschluss", region: "Ländlich / Kleinstädte",
+    haushaltstyp: "ehepaar", geschlecht: [],
+    werte: ["Tradition", "Pflicht", "Bescheidenheit", "Ordnung", "Familie", "Sparsamkeit"],
+    lebensstil: ["Heimorientiert & Gemütlich", "Ländlich & Naturverbunden"],
+    kaufverhalten: ["Traditionell & Loyalitätsstark", "Risikoavers & Markentreu"],
+    bevoelkerung: "13%",
+    milieu: "Traditionelle",
+  },
+  {
+    label: "Prekäre", sinus: true,
+    alter: "25–55", einkommen: "< 20.000 €/Jahr",
+    bildung: "Hauptschulabschluss", region: "Kleinstädte / städtische Randlagen",
+    haushaltstyp: "single", geschlecht: [],
+    werte: ["Sicherheit", "Zugehörigkeit", "Respekt", "Würde", "Familie"],
+    lebensstil: ["Heimorientiert & Gemütlich"],
+    kaufverhalten: ["Preissensibel & Schnäppchenjäger", "Traditionell & Loyalitätsstark"],
+    bevoelkerung: "9%",
+    milieu: "Prekäre",
+  },
+  {
+    label: "Hedonistische", sinus: true,
+    alter: "15–35", einkommen: "15.000–35.000 €/Jahr",
+    bildung: "Hauptschulabschluss", region: "Großstadt / Mittelgroße Stadt",
+    haushaltstyp: "single", geschlecht: [],
+    werte: ["Spaß", "Freiheit", "Spontanität", "Genuss", "Gemeinschaft", "Erlebnis"],
+    lebensstil: ["Digital & Social-Media-Affin", "Gaming & Tech-Affin", "Sportlich & Aktiv"],
+    kaufverhalten: ["Impulsiv & Spontan", "Community-Getrieben & Social-Proof"],
+    bevoelkerung: "15%",
+    milieu: "Hedonistische",
+  },
+];
 
 const PERSONA_PRESETS_B2C = [
   {
@@ -559,7 +675,7 @@ const STIMMUNGEN = ["eher skeptisch heute", "offen und neugierig", "pragmatisch 
 const PERSPEKTIVEN = ["legt heute besonders viel Wert auf Preis", "denkt gerade viel an Qualität", "hat kürzlich ein ähnliches Produkt genutzt", "hat das Thema gerade im Freundeskreis diskutiert", "kennt das Produkt bisher nur vom Hören", "hat konkrete Alternativen im Kopf", "ist zum ersten Mal mit diesem Thema konfrontiert", "hat bereits Kauferfahrung in dieser Kategorie", "ist durch eine Empfehlung auf das Thema gekommen", "recherchiert gerade aktiv in dieser Kategorie"];
 
 const EMPTY_AUFTRAGGEBER = { name: "", branche: "", url: "", beschreibung: "" };
-const EMPTY_PERSONA_B2C = { label: "", alter: "", einkommen: "", bildung: "", region: "", haushaltstyp: "", werte: [], lebensstil: [], kaufverhalten: [], bevoelkerung: "" };
+const EMPTY_PERSONA_B2C = { label: "", alter: "", geschlecht: [], einkommen: "", bildung: "", region: "", haushaltstyp: "", werte: [], lebensstil: [], kaufverhalten: [], bevoelkerung: "" };
 const EMPTY_PERSONA_B2B = { label: "", type: "b2b", branche: "", mitarbeiter: "", umsatz: "", region: "", strategischeAusrichtung: "", buyingCenterRolle: [], hierarchie: "", budget: "", kaufverhalten: [], preisorientierung: "", anbieterloyalitaet: "", informationsquellen: [], onlineAffinitaet: "" };
 const EMPTY_GEGENSTAND = { name: "", beschreibung: "", preis: "", bilder: [] };
 
@@ -580,11 +696,16 @@ export default function SiliconSamplingApp() {
   const [saveNameInput, setSaveNameInput] = useState("");
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [openWerteCluster, setOpenWerteCluster] = useState(null);
-  const [personaMode, setPersonaMode] = useState("select"); // "select" | "create"
+  const [personaMode, setPersonaMode] = useState("select");
+  const [presetTab, setPresetTab] = useState("standard"); // "select" | "create"
 
   // Load saved personas + hidden presets from storage on mount
   useEffect(() => {
     (async () => {
+      try {
+        const result = await window.storage.get("analyses-library");
+        if (result?.value) setSavedAnalyses(JSON.parse(result.value));
+      } catch {}
       try {
         const result = await window.storage.get("auftraggeber-library");
         if (result?.value) {
@@ -678,6 +799,8 @@ export default function SiliconSamplingApp() {
   const [error, setError] = useState("");
   const [expandedCard, setExpandedCard] = useState(null);
   const [exporting, setExporting] = useState("");
+  const [savedAnalyses, setSavedAnalyses] = useState([]);
+  const [showAnalyseModal, setShowAnalyseModal] = useState(false);
 
   const canProceed = () => {
     if (step === 0) return auftraggeber.name && auftraggeber.branche;
@@ -729,7 +852,7 @@ Der Score (0-10) ergibt sich aus deiner echten Einschätzung als diese Persona �
 NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|neutral|negativ","nps":<0-10>}`
       : `Du wirst befragt im Auftrag von: ${auftraggeber.name}${auftraggeber.beschreibung ? " — " + auftraggeber.beschreibung : ""}.
 Du bist eine synthetische B2C-Marktforschungs-Persona:
-- Alter: ${persona.alter}  - Einkommen: ${persona.einkommen}  - Bildung: ${persona.bildung}
+- Geschlecht: ${persona.geschlecht?.length > 0 ? persona.geschlecht.join(", ") : "nicht spezifiziert"}  - Alter: ${persona.alter}  - Einkommen: ${persona.einkommen}  - Bildung: ${persona.bildung}
 - Region: ${persona.region}  - Haushaltstyp: ${haushaltsLabel}
 - Werte: ${Array.isArray(persona.werte) ? persona.werte.join(", ") : persona.werte}
 - Lebensstil: ${Array.isArray(persona.lebensstil) ? persona.lebensstil.join(", ") : persona.lebensstil}
@@ -750,16 +873,29 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
         const cur = Math.min(batchSize, total - b * batchSize);
         const batch = await Promise.all(Array.from({ length: cur }, async (_, i) => {
           const id = b * batchSize + i + 1;
-          const resp = await fetch("/api/anthropic", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system: buildPrompt(id),
-              messages: [{ role: "user", content: `Befragung ${id}/${total}:\n${validQs.map((q, qi) => `F${qi + 1}: ${q}`).join("\n")}` }] }),
-          });
-          if (!resp.ok) throw new Error(`API ${resp.status}`);
-          const data = await resp.json();
-          const text = data.content?.find(c => c.type === "text")?.text || "{}";
-          try { return { id, ...JSON.parse(text.replace(/```json|```/g, "").trim()) }; }
-          catch { return { id, answers: validQs.map(q => ({ question: q, answer: "–" })), sentiment: "neutral", nps: 5 }; }
+          let respondentResult = null;
+          for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+              const resp = await fetch("/api/anthropic", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1200, system: buildPrompt(id),
+                  messages: [{ role: "user", content: `Befragung ${id}/${total}:\n${validQs.map((q, qi) => `F${qi + 1}: ${q}`).join("\n")}\n\nANTWORTE NUR MIT VALIDEM JSON.` }] }),
+              });
+              if (!resp.ok) continue;
+              const data = await resp.json();
+              const text = data.content?.find(c => c.type === "text")?.text || "";
+              const cleaned = text.replace(/```json|```/g, "").trim();
+              const j1 = cleaned.indexOf("{"), j2 = cleaned.lastIndexOf("}");
+              if (j1 > -1 && j2 > j1) {
+                const parsed = JSON.parse(cleaned.substring(j1, j2 + 1));
+                if (parsed.answers && parsed.answers.length > 0 && parsed.answers[0].answer !== "–") {
+                  respondentResult = { id, ...parsed };
+                  break;
+                }
+              }
+            } catch {}
+          }
+          return respondentResult || { id, answers: validQs.map(q => ({ question: q, answer: "Keine Antwort erhalten." })), sentiment: "neutral", nps: 5 };
         }));
         // Recalculate sentiment from score to ensure consistency
         const calibrated = batch.map(r => ({
@@ -854,6 +990,40 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
     setExporting("");
   };
 
+  const saveAnalyse = async (name) => {
+    const analyse = {
+      name: name || `${auftraggeber.name} · ${gegenstand.name || topic} · ${new Date().toLocaleDateString("de-DE")}`,
+      savedAt: Date.now(),
+      auftraggeber, themaKategorie, topic, gegenstand, persona, personaType,
+      questions, sampleSize, results, summary, avgNps: results.length > 0 ? (results.reduce((s, r) => s + (r.nps || 5), 0) / results.length).toFixed(1) : null,
+    };
+    const updated = [analyse, ...savedAnalyses.filter(a => a.name !== analyse.name)].slice(0, 20);
+    setSavedAnalyses(updated);
+    try { await window.storage.set("analyses-library", JSON.stringify(updated)); } catch {}
+    setShowAnalyseModal(false);
+  };
+
+  const loadAnalyse = (a) => {
+    setAuftraggeber(a.auftraggeber || { ...EMPTY_AUFTRAGGEBER });
+    setThemaKategorie(a.themaKategorie || "");
+    setTopic(a.topic || "");
+    setGegenstand(a.gegenstand || { ...EMPTY_GEGENSTAND });
+    setPersona(a.persona || { ...EMPTY_PERSONA_B2C });
+    setPersonaType(a.personaType || "b2c");
+    setQuestions(a.questions || [""]);
+    setSampleSize(a.sampleSize || 8);
+    setResults(a.results || []);
+    setSummary(a.summary || "");
+    setStep(6); // Go to results
+    setShowAnalyseModal(false);
+  };
+
+  const deleteAnalyse = async (name) => {
+    const updated = savedAnalyses.filter(a => a.name !== name);
+    setSavedAnalyses(updated);
+    try { await window.storage.set("analyses-library", JSON.stringify(updated)); } catch {}
+  };
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", background: C.bgSoft, minHeight: "100vh", color: C.text }}>
@@ -865,6 +1035,14 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
             <img src={`data:image/png;base64,${LOGO_B64}`} alt="von Neuem" style={{ height: 44, filter: "brightness(0) invert(1)" }} />
             <div style={{ width: 1, height: 22, background: "#2a4a6a" }} />
             <div style={{ fontSize: 12, color: "#7eb8d8", letterSpacing: "0.12em", fontWeight: 600, textTransform: "uppercase" }}>Silicon Sampling</div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {savedAnalyses.length > 0 && (
+              <button onClick={() => setShowAnalyseModal(true)}
+                style={{ padding: "5px 12px", borderRadius: 6, border: `1px solid #2a4a6a`, background: "rgba(0,130,200,0.15)", color: "#7eb8d8", cursor: "pointer", fontSize: 11, fontFamily: "inherit", fontWeight: 600 }}>
+                📂 Analysen ({savedAnalyses.length})
+              </button>
+            )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
             {STEPS.map((s, i) => (
@@ -1039,7 +1217,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
               ].map(({ id, label, Icon: TabIcon, desc }) => {
                 const sel = personaType === id;
                 return (
-                  <div key={id} onClick={() => { setPersonaType(id); setPersona(id === "b2b" ? { label: "", type: "b2b", branche: "", mitarbeiter: "", umsatz: "", region: "", strategischeAusrichtung: "", buyingCenterRolle: [], hierarchie: "", budget: "", kaufverhalten: [], preisorientierung: "", anbieterloyalitaet: "", informationsquellen: [], onlineAffinitaet: "" } : { label: "", alter: "", einkommen: "", bildung: "", region: "", haushaltstyp: "", werte: [], lebensstil: [], kaufverhalten: [] }); setPersonaMode("select"); }}
+                  <div key={id} onClick={() => { setPersonaType(id); setPersona(id === "b2b" ? { label: "", type: "b2b", branche: "", mitarbeiter: "", umsatz: "", region: "", strategischeAusrichtung: "", buyingCenterRolle: [], hierarchie: "", budget: "", kaufverhalten: [], preisorientierung: "", anbieterloyalitaet: "", informationsquellen: [], onlineAffinitaet: "" } : { label: "", alter: "", einkommen: "", bildung: "", region: "", haushaltstyp: "", werte: [], lebensstil: [], kaufverhalten: [] }); setPersonaMode("select"); setPresetTab("standard"); }}
                     style={{ flex: 1, padding: "14px 18px", borderRadius: 10, cursor: "pointer", border: `2px solid ${sel ? C.blue : C.border}`, background: sel ? C.blueLight : C.bg, display: "flex", alignItems: "center", gap: 12, boxShadow: sel ? `0 0 0 1px ${C.blue}` : "0 1px 4px rgba(0,0,0,0.06)", transition: "all 0.15s" }}>
                     <div style={{ width: 36, height: 36, borderRadius: 8, background: sel ? C.blue : C.bgSoft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <TabIcon size={18} color={sel ? "#fff" : C.textMid} />
@@ -1056,7 +1234,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
             {/* Mode Tabs */}
             <div style={{ display: "flex", gap: 0, marginBottom: 28, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 4, width: "fit-content", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               {[
-                { id: "select", label: "📋  Persona wählen", count: savedPersonas.length },
+                { id: "select", label: "📋  Persona wählen", count: savedPersonas.filter(p => personaType === "b2b" ? p.type === "b2b" : p.type !== "b2b").length },
                 { id: "create", label: "✏️  Persona erstellen" },
               ].map(tab => (
                 <button key={tab.id} onClick={() => setPersonaMode(tab.id)} style={{
@@ -1076,9 +1254,16 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
               <div>
                 {/* Presets */}
                 <div style={{ marginBottom: 28 }}>
+                  {personaType === "b2c" && (
+                    <div style={{ display: "flex", gap: 0, marginBottom: 14, background: C.bgSoft, border: `1px solid ${C.border}`, borderRadius: 8, padding: 3, width: "fit-content" }}>
+                      {[{ id: "standard", label: "Standard" }, { id: "sinus", label: "Sinus-Milieus" }].map(tab => (
+                        <button key={tab.id} onClick={() => setPresetTab(tab.id)} style={{ padding: "5px 16px", borderRadius: 6, border: "none", cursor: "pointer", background: presetTab === tab.id ? C.navy : "transparent", color: presetTab === tab.id ? "#fff" : C.textMid, fontSize: 12, fontWeight: presetTab === tab.id ? 700 : 400, fontFamily: "inherit", transition: "all 0.15s" }}>{tab.label}</button>
+                      ))}
+                    </div>
+                  )}
                   <Label>Vorlagen</Label>
                   <div style={{ display: "grid", gridTemplateColumns: `repeat(${personaType === "b2c" ? 3 : 2},1fr)`, gap: 12 }}>
-                    {(personaType === "b2c" ? PERSONA_PRESETS_B2C : PERSONA_PRESETS_B2B)
+                    {(personaType === "b2c" ? (presetTab === "sinus" ? PERSONA_PRESETS_SINUS : PERSONA_PRESETS_B2C) : PERSONA_PRESETS_B2B)
                       .filter(p => !(hiddenPresets[personaType] || []).includes(p.label))
                       .map((p, i) => {
                       const ht = personaType === "b2c" ? HAUSHALTSTYP_OPTIONS.find(h => h.value === p.haushaltstyp) : null;
@@ -1096,7 +1281,8 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                               ? <div style={{ fontSize: 11, color: C.textMid }}>{p.alter} · {ht?.label}</div>
                               : <div style={{ fontSize: 11, color: C.textMid }}>{p.branche} · {p.mitarbeiter?.split(" ")[0]}</div>
                           )}
-                          <BevoelkerungBadge alter={p.alter} fallback={p.bevoelkerung} />
+                          {p.sinus && p.bevoelkerung && <div style={{ fontSize: 10, marginTop: 4, padding: "2px 7px", borderRadius: 8, background: "#f0e8f6", color: "#7B3FA0", fontWeight: 700, display: "inline-block" }}>🇩🇪 {p.bevoelkerung} der Bevölkerung</div>}
+                          {!p.sinus && <BevoelkerungBadge alter={p.alter} fallback={p.bevoelkerung} />}
                         </div>
                       );
                     })}
@@ -1117,7 +1303,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                   <div>
                     <Label>Gespeicherte Personas</Label>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {savedPersonas.map((p, i) => {
+                      {savedPersonas.filter(p => personaType === "b2b" ? p.type === "b2b" : p.type !== "b2b").map((p, i) => {
                         const isB2B = p.type === "b2b";
                         const ht = !isB2B ? HAUSHALTSTYP_OPTIONS.find(h => h.value === p.haushaltstyp) : null;
                         return (
@@ -1186,6 +1372,25 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                     </div>
                     <div style={{ gridColumn: "1 / -1" }}>
                       <Field label="Region" value={persona.region} onChange={v => setPersona({ ...persona, region: v })} placeholder="z.B. Deutschland (urban/suburban)" />
+                    </div>
+                  </div>
+
+                  {/* Geschlecht */}
+                  <div style={{ marginBottom: 20 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                      <Label>Geschlecht</Label>
+                      {persona.geschlecht?.length > 0 && <span style={{ fontSize: 11, color: C.blue, fontWeight: 700 }}>{persona.geschlecht.join(", ")}</span>}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {["Weiblich", "Männlich", "Divers / Nicht-binär", "Keine Angabe"].map(g => {
+                        const sel = persona.geschlecht?.includes(g);
+                        return (
+                          <button key={g} onClick={() => setPersona(p => ({ ...p, geschlecht: sel ? (p.geschlecht||[]).filter(x => x !== g) : [...(p.geschlecht||[]), g] }))}
+                            style={{ padding: "7px 16px", borderRadius: 20, fontSize: 12, fontFamily: "inherit", cursor: "pointer", border: `1.5px solid ${sel ? C.blue : C.border}`, background: sel ? C.blueLight : C.bg, color: sel ? C.blue : C.textMid, fontWeight: sel ? 700 : 400, transition: "all 0.12s" }}>
+                            {sel ? "✓ " : ""}{g}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -1271,7 +1476,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                                 {cluster.werte.map(w => {
                                   const sel = persona.werte.includes(w);
                                   return (
-                                    <button key={w} onClick={() => setPersona(p => ({ ...p, werte: sel ? p.werte.filter(x => x !== w) : [...p.werte, w] }))}
+                                    <button key={w} onClick={() => setPersona(p => ({ ...p, werte: sel ? p.werte.filter(x => x !== w) : p.werte.length >= 15 ? p.werte : [...p.werte, w] }))}
                                       style={{ padding: "5px 12px", borderRadius: 16, fontSize: 12, fontFamily: "inherit", cursor: "pointer", border: `1.5px solid ${sel ? cluster.color : C.border}`, background: sel ? cluster.color : C.bg, color: sel ? "#fff" : C.textMid, fontWeight: sel ? 600 : 400, transition: "all 0.12s" }}>
                                       {sel ? "✓ " : ""}{w}
                                     </button>
@@ -1704,7 +1909,11 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                     <p style={{ margin: "4px 0 0", fontSize: 13, color: C.textMid }}>{results.length} Respondenten · {persona.label} · {topic}</p>
                   </div>
                   {/* Export Buttons */}
-                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                  <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
+                    <button onClick={() => setShowAnalyseModal(true)}
+                      style={{ padding: "9px 18px", borderRadius: 7, border: `1px solid ${C.blue}`, background: C.blueLight, color: C.blue, cursor: "pointer", fontSize: 12, fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+                      💾 Analyse speichern
+                    </button>
                     {[
                       { type: "csv", label: "CSV", icon: "⬇" },
                       { type: "pdf", label: "PDF", icon: "⬇" },
@@ -1872,6 +2081,48 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
           </div>
         )}
       </div>
+
+      {/* ── Analyse Modal ── */}
+      {showAnalyseModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}
+          onClick={() => setShowAnalyseModal(false)}>
+          <div style={{ background: C.bg, borderRadius: 16, padding: 32, width: 560, maxHeight: "80vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: C.text }}>Analysen</h2>
+              <button onClick={() => setShowAnalyseModal(false)} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: C.textLight }}>✕</button>
+            </div>
+            {results.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 13, color: C.textMid, marginBottom: 10 }}>Aktuelle Analyse speichern:</div>
+                <AnalyseSaveBar onSave={saveAnalyse} defaultName={`${auftraggeber.name || "Studie"} · ${gegenstand.name || topic || "Analyse"} · ${new Date().toLocaleDateString("de-DE")}`} />
+              </div>
+            )}
+            {savedAnalyses.length > 0 && (
+              <div>
+                <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: C.textLight, fontWeight: 700, marginBottom: 12 }}>Gespeicherte Analysen</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {savedAnalyses.map((a, i) => (
+                    <div key={i} style={{ background: C.bgSoft, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 2 }}>{a.name}</div>
+                        <div style={{ fontSize: 11, color: C.textMid }}>{a.results?.length || 0} Respondenten · Ø {a.avgNps}/10</div>
+                      </div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button onClick={() => loadAnalyse(a)} style={{ padding: "6px 14px", borderRadius: 6, border: `1px solid ${C.blue}`, background: C.blueLight, color: C.blue, cursor: "pointer", fontSize: 12, fontFamily: "inherit", fontWeight: 600 }}>Laden</button>
+                        <button onClick={() => deleteAnalyse(a.name)} style={{ padding: "6px 10px", borderRadius: 6, border: `1px solid ${C.border}`, background: C.bg, color: C.textLight, cursor: "pointer", fontSize: 12 }}>✕</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {savedAnalyses.length === 0 && results.length === 0 && (
+              <div style={{ textAlign: "center", padding: "24px 0", color: C.textLight, fontSize: 13 }}>Noch keine Analysen gespeichert.</div>
+            )}
+          </div>
+        </div>
+      )}
 
       <style>{`@keyframes dotPulse { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} } * { box-sizing: border-box; } input:focus { outline: 2px solid ${C.blue}40 !important; } input::placeholder { color: #b0bac5; } button:hover:not(:disabled) { opacity: 0.88; }`}</style>
     </div>
@@ -2061,6 +2312,28 @@ function DiktierInput({ value, onChange, placeholder, accentColor = C.blue }) {
         </button>
       )}
       <style>{`@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }`}</style>
+    </div>
+  );
+}
+
+
+function AnalyseSaveBar({ onSave, defaultName }) {
+  const [name, setName] = useState(defaultName || "");
+  const [saved, setSaved] = useState(false);
+  const handleSave = () => {
+    onSave(name);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+  return (
+    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <input value={name} onChange={e => setName(e.target.value)}
+        placeholder="Name der Analyse"
+        style={{ flex: 1, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.text, background: C.bg, fontFamily: "inherit", outline: "none" }} />
+      <button onClick={handleSave} disabled={!name.trim()}
+        style={{ padding: "9px 18px", borderRadius: 7, border: "none", background: saved ? C.green : C.blue, color: "#fff", cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 13, fontFamily: "inherit", fontWeight: 700, transition: "all 0.3s", opacity: name.trim() ? 1 : 0.5 }}>
+        {saved ? "✓ Gespeichert" : "Speichern"}
+      </button>
     </div>
   );
 }
