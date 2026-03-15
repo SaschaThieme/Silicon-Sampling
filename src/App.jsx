@@ -526,6 +526,9 @@ async function exportPPTX(results, persona, topic, summary, avgNps, sentimentCou
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
+const STIMMUNGEN = ["eher skeptisch heute", "offen und neugierig", "pragmatisch und direkt", "leicht genervt von Werbung", "auf der Suche nach etwas Gutem", "zeitlich gestresst", "in Kauflaune", "gerade enttäuscht von einem ähnlichen Produkt", "entspannt und reflektiert", "eher konservativ in Entscheidungen", "begeisterungsfähig", "kritisch aber fair", "unentschlossen", "hat schlechte Erfahrungen gemacht", "sehr markenaffin"];
+const PERSPEKTIVEN = ["legt heute besonders viel Wert auf Preis", "denkt gerade viel an Qualität", "hat kürzlich ein ähnliches Produkt genutzt", "hat das Thema gerade im Freundeskreis diskutiert", "kennt das Produkt bisher nur vom Hören", "hat konkrete Alternativen im Kopf", "ist zum ersten Mal mit diesem Thema konfrontiert", "hat bereits Kauferfahrung in dieser Kategorie", "ist durch eine Empfehlung auf das Thema gekommen", "recherchiert gerade aktiv in dieser Kategorie"];
+
 const EMPTY_AUFTRAGGEBER = { name: "", branche: "", url: "", beschreibung: "" };
 const EMPTY_PERSONA_B2C = { label: "", alter: "", einkommen: "", bildung: "", region: "", haushaltstyp: "", werte: [], lebensstil: [], kaufverhalten: [], bevoelkerung: "" };
 const EMPTY_PERSONA_B2B = { label: "", type: "b2b", branche: "", mitarbeiter: "", umsatz: "", region: "", strategischeAusrichtung: "", buyingCenterRolle: [], hierarchie: "", budget: "", kaufverhalten: [], preisorientierung: "", anbieterloyalitaet: "", informationsquellen: [], onlineAffinitaet: "" };
@@ -664,8 +667,6 @@ export default function SiliconSamplingApp() {
     const haushaltsLabel = HAUSHALTSTYP_OPTIONS.find(h => h.value === persona.haushaltstyp)?.label || "";
     const stratLabel = B2B_STRATEGISCHE_AUSRICHTUNG.find(s => s.value === persona.strategischeAusrichtung)?.label || "";
 
-    const STIMMUNGEN = ["eher skeptisch heute", "offen und neugierig", "pragmatisch und direkt", "leicht genervt von Werbung", "auf der Suche nach etwas Gutem", "zeitlich gestresst", "in Kauflaune", "gerade enttäuscht von einem ähnlichen Produkt", "entspannt und reflektiert", "eher konservativ in Entscheidungen", "begeisterungsfähig", "kritisch aber fair", "unentschlossen", "hat schlechte Erfahrungen gemacht", "sehr markenaffin"];
-    const PERSPEKTIVEN = ["legt heute besonders viel Wert auf Preis", "denkt gerade viel an Qualität", "hat kürzlich ein ähnliches Produkt genutzt", "hat das Thema gerade im Freundeskreis diskutiert", "kennt das Produkt bisher nur vom Hören", "hat konkrete Alternativen im Kopf", "ist zum ersten Mal mit diesem Thema konfrontiert", "hat bereits Kauferfahrung in dieser Kategorie", "ist durch eine Empfehlung auf das Thema gekommen", "recherchiert gerade aktiv in dieser Kategorie"];
     const getSeed = (id) => {
       const s = STIMMUNGEN[(id * 7 + 3) % STIMMUNGEN.length];
       const p = PERSPEKTIVEN[(id * 11 + 5) % PERSPEKTIVEN.length];
