@@ -405,7 +405,7 @@ async function exportPDF(results, persona, topic, summary, avgNps, sentimentCoun
     if (y > 265) { doc.addPage(); y = 20; }
     doc.setFillColor(0, 130, 200, 0.08);
     doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 130, 200);
-    doc.text(`Respondent #${r.id}  ·  NPS ${r.nps}/10  ·  ${r.sentiment}`, M, y); y += 5;
+    doc.text(`Respondent #${r.id}  ·  Score ${r.nps}/10  ·  ${r.sentiment}`, M, y); y += 5;
     (r.answers || []).forEach(a => {
       doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(13, 31, 53);
       const qLines = doc.splitTextToSize(a.question, W - M * 2 - 4); doc.text(qLines, M + 4, y); y += qLines.length * 4 + 1;
@@ -474,7 +474,7 @@ async function exportPPTX(results, persona, topic, summary, avgNps, sentimentCou
   results.forEach((r, i) => {
     const bw = (r.nps / 10) * 8.8;
     s.addShape(pptx.ShapeType.rect, { x: 0.4, y: 3.2 + i * 0.28, w: bw, h: 0.2, fill: { color: blue } });
-    s.addText(`#${r.id} NPS ${r.nps}`, { x: 0.4, y: 3.2 + i * 0.28, w: 2, h: 0.2, fontSize: 7, color: white, fontFace: "Arial" });
+    s.addText(`#${r.id} Score ${r.nps}`, { x: 0.4, y: 3.2 + i * 0.28, w: 2, h: 0.2, fontSize: 7, color: white, fontFace: "Arial" });
     if (3.2 + i * 0.28 > 6.8) return;
   });
 
@@ -487,31 +487,23 @@ async function exportPPTX(results, persona, topic, summary, avgNps, sentimentCou
     s.addText(summary, { x: 0.65, y: 1.2, w: 8.7, h: 4.5, fontSize: 11, color: navy, fontFace: "Arial", valign: "top" });
   }
 
-  // ── Slides: Individual results (3 per slide) ──
-  const chunkSize = 3;
-  for (let start = 0; start < results.length; start += chunkSize) {
+  // ── Slides: Individual results (1 per slide) ──
+  results.forEach((r) => {
     s = pptx.addSlide();
     s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: "100%", h: 0.9, fill: { color: navy } });
-    const end = Math.min(start + chunkSize, results.length);
-    s.addText(`Respondenten ${start + 1}–${end}`, { x: 0.5, y: 0.18, w: 9, h: 0.55, fontSize: 20, bold: true, color: white, fontFace: "Arial" });
-    results.slice(start, end).forEach((r, idx) => {
-      const col = idx;
-      const cx = 0.2 + col * 3.3;
-      const sentColor = r.sentiment === "positiv" ? "16A34A" : r.sentiment === "negativ" ? "E5007D" : "D97706";
-      s.addShape(pptx.ShapeType.rect, { x: cx, y: 1.0, w: 3.1, h: 5.5, fill: { color: lightBg }, line: { color: "DDE6EF", pt: 1 } });
-      s.addText(`#${r.id}`, { x: cx + 0.1, y: 1.1, w: 1, h: 0.35, fontSize: 12, bold: true, color: blue, fontFace: "Arial" });
-      s.addText(`${r.sentiment}`, { x: cx + 1.1, y: 1.1, w: 1.3, h: 0.3, fontSize: 8, bold: true, color: sentColor, fontFace: "Arial" });
-      s.addText(`NPS ${r.nps}/10`, { x: cx + 2.3, y: 1.1, w: 0.7, h: 0.3, fontSize: 8, color: textMid, fontFace: "Arial" });
-      let ay = 1.55;
-      (r.answers || []).slice(0, 3).forEach(a => {
-        s.addText(a.question, { x: cx + 0.12, y: ay, w: 2.86, h: 0.3, fontSize: 7, bold: true, color: navy, fontFace: "Arial" });
-        ay += 0.3;
-        const aText = (a.answer || "").substring(0, 120);
-        s.addText(aText, { x: cx + 0.12, y: ay, w: 2.86, h: 0.65, fontSize: 7, color: textMid, fontFace: "Arial" });
-        ay += 0.7;
-      });
+    const sentColor = r.sentiment === "positiv" ? "16A34A" : r.sentiment === "negativ" ? "E5007D" : "D97706";
+    s.addText(`Respondent #${r.id}`, { x: 0.5, y: 0.18, w: 6, h: 0.55, fontSize: 20, bold: true, color: white, fontFace: "Arial" });
+    s.addText(r.sentiment, { x: 6.5, y: 0.22, w: 1.5, h: 0.4, fontSize: 11, bold: true, color: sentColor, fontFace: "Arial", align: "center" });
+    s.addText(`Score ${r.nps}/10`, { x: 8.2, y: 0.22, w: 1.5, h: 0.4, fontSize: 11, bold: true, color: "7EB8D8", fontFace: "Arial", align: "center" });
+    let ay = 1.1;
+    (r.answers || []).forEach(a => {
+      if (ay > 6.8) return;
+      s.addText(a.question, { x: 0.5, y: ay, w: 9.3, h: 0.35, fontSize: 9, bold: true, color: navy, fontFace: "Arial" });
+      ay += 0.35;
+      s.addText(a.answer || "–", { x: 0.5, y: ay, w: 9.3, h: 0.6, fontSize: 9, color: textMid, fontFace: "Arial", valign: "top" });
+      ay += 0.7;
     });
-  }
+  });
 
   pptx.writeFile({ fileName: `silicon-sampling_${persona.label.replace(/\s+/g, "-")}_${Date.now()}.pptx` });
 }
@@ -736,7 +728,7 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
       setLoadingSummary(true);
       try {
         const allAnswers = collected.map(r =>
-          `Person ${r.id} (NPS: ${r.nps}, ${r.sentiment}):\n` + (r.answers || []).map(a => `  Q: ${a.question}\n  A: ${a.answer}`).join("\n")
+          `Person ${r.id} (Score: ${r.nps}, ${r.sentiment}):\n` + (r.answers || []).map(a => `  Q: ${a.question}\n  A: ${a.answer}`).join("\n")
         ).join("\n\n");
         const sumResp = await fetch("/api/anthropic", {
           method: "POST", headers: { "Content-Type": "application/json" },
@@ -1676,7 +1668,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                   <KpiCard label="Negativ" value={sentimentCounts["negativ"] || 0} unit={`/${results.length}`} color={C.pink} bg={C.pinkLight} border={`${C.pink}30`} />
                 </div>
 
-                {/* NPS Visualization */}
+                {/* Score-Visualisierung */}
                 <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: "20px 24px", marginBottom: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
                   <Label>{themaKategorie ? themaKategorie.split(" ")[0] + "-Bewertung" : "Bewertungsverteilung"}</Label>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
@@ -1734,34 +1726,10 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                     </div>
                   </div>
 
-                  {/* Spider / Radar Chart */}
-                  {spiderData && (
-                    <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: "20px 24px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                      <Label>Dimensionen-Profil</Label>
-                      <SpiderChart dimensions={spiderData.dimensions} scores={spiderData.scores} />
-                    </div>
-                  )}
+
                 </div>
 
-                {/* Word Cloud */}
-                {topWords.length > 0 && (
-                  <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: "20px 24px", marginBottom: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                    <Label>Häufigste Begriffe</Label>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8, alignItems: "center" }}>
-                      {topWords.map((word, i) => {
-                        const size = Math.max(11, 22 - i * 0.7);
-                        const opacity = Math.max(0.5, 1 - i * 0.04);
-                        const colors = [C.blue, "#7B3FA0", C.pink, C.green, C.amber];
-                        const color = colors[i % colors.length];
-                        return (
-                          <span key={i} style={{ fontSize: size, fontWeight: i < 5 ? 700 : i < 10 ? 600 : 500, color, opacity, lineHeight: 1.4 }}>
-                            {word}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+
 
                 {/* Individual Results */}
                 <div style={{ marginBottom: 16 }}>
@@ -1783,7 +1751,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                               <div key={ni} style={{ width: 8, height: 8, borderRadius: 2, background: ni < r.nps ? C.blue : C.borderLight }} />
                             ))}
                           </div>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: C.blue }}>NPS {r.nps}</span>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: C.blue }}>Score {r.nps}</span>
                           <span style={{ color: C.textLight, fontSize: 12 }}>{expandedCard === ri ? "▲" : "▼"}</span>
                         </div>
                       </div>
