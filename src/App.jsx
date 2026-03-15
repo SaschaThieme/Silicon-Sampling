@@ -636,6 +636,8 @@ export default function SiliconSamplingApp() {
   const [results, setResults] = useState([]);
   const [summary, setSummary] = useState("");
   const [loadingSummary, setLoadingSummary] = useState(false);
+  const [spiderData, setSpiderData] = useState(null);
+  const [topWords, setTopWords] = useState([]);
   const [error, setError] = useState("");
   const [expandedCard, setExpandedCard] = useState(null);
   const [exporting, setExporting] = useState("");
@@ -739,10 +741,40 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
         const sumResp = await fetch("/api/anthropic", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000,
-            messages: [{ role: "user", content: `Marktforschungsexperte bei Unternehmensberatung. Analysiere diese Befragungsergebnisse, erstelle Executive Summary (max. 180 Wörter, Deutsch). Struktur: 1) Kernerkenntnisse, 2) Auffälligkeiten, 3) Handlungsempfehlungen.\n\nAuftraggeber: ${auftraggeber.name}\nThema: ${themaKategorie}\nGegenstand: ${gegenstand.name || topic}\nPersona: ${persona.label}\n\n${allAnswers}` }] }),
+            messages: [{ role: "user", content: `Du bist Marktforschungsexperte. Analysiere diese Befragungsergebnisse.
+
+Auftraggeber: ${auftraggeber.name}
+Thema: ${themaKategorie}
+Gegenstand: ${gegenstand.name || topic}
+Persona: ${persona.label}
+
+${allAnswers}
+
+Antworte NUR mit diesem JSON (kein anderer Text):
+{
+  "summary": "Executive Summary auf Deutsch, max. 180 Wörter. Struktur: 1) Kernerkenntnisse, 2) Auffälligkeiten, 3) Handlungsempfehlungen. Verwende NICHT das Wort NPS — nutze stattdessen 'Bewertung', 'Zufriedenheit' oder 'Score'.",
+  "spider": {
+    "dimensions": ["Dimension1", "Dimension2", "Dimension3", "Dimension4", "Dimension5"],
+    "scores": [7, 5, 8, 4, 6]
+  },
+  "topWords": ["Wort1", "Wort2", "Wort3", "Wort4", "Wort5", "Wort6", "Wort7", "Wort8", "Wort9", "Wort10", "Wort11", "Wort12", "Wort13", "Wort14", "Wort15"]
+}
+
+Für spider: Leite 5 relevante Bewertungsdimensionen aus den Fragen und Antworten ab (z.B. "Qualität", "Preisakzeptanz", "Design", "Vertrauen", "Weiterempfehlung"). Scores 0-10 basierend auf den Antworten.
+Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworten (keine Füllwörter).` }] }),
         });
         const sd = await sumResp.json();
-        setSummary(sd.content?.find(c => c.type === "text")?.text || "");
+        const rawText = sd.content?.find(c => c.type === "text")?.text || "{}";
+        try {
+          const parsed = JSON.parse(rawText.replace(/```json|```/g, "").trim());
+          setSummary(parsed.summary || "");
+          setSpiderData(parsed.spider || null);
+          setTopWords(parsed.topWords || []);
+        } catch {
+          setSummary(rawText);
+          setSpiderData(null);
+          setTopWords([]);
+        }
       } catch { setSummary(""); }
       setLoadingSummary(false);
     }
@@ -1674,6 +1706,63 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
                   </div>
                 )}
 
+                {/* ── Visualisierungen ── */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
+
+                  {/* Score-Verteilung Balkendiagramm */}
+                  <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: "20px 24px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                    <Label>Score-Verteilung</Label>
+                    <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 100, marginTop: 8 }}>
+                      {[...Array(11)].map((_, score) => {
+                        const count = results.filter(r => r.nps === score).length;
+                        const maxCount = Math.max(...[...Array(11)].map((_, s) => results.filter(r => r.nps === s).length), 1);
+                        const height = count > 0 ? Math.max(8, (count / maxCount) * 90) : 0;
+                        const color = score >= 8 ? C.green : score >= 5 ? C.blue : C.pink;
+                        return (
+                          <div key={score} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                            {count > 0 && <div style={{ fontSize: 9, color: C.textLight, fontWeight: 600 }}>{count}</div>}
+                            <div style={{ width: "100%", height: height, background: color, borderRadius: "3px 3px 0 0", transition: "height 0.5s ease", opacity: count === 0 ? 0.15 : 1 }} />
+                            <div style={{ fontSize: 9, color: C.textLight }}>{score}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: C.textLight, marginTop: 4 }}>
+                      <span style={{ color: C.pink }}>● Kritisch (0–4)</span>
+                      <span style={{ color: C.blue }}>● Neutral (5–7)</span>
+                      <span style={{ color: C.green }}>● Positiv (8–10)</span>
+                    </div>
+                  </div>
+
+                  {/* Spider / Radar Chart */}
+                  {spiderData && (
+                    <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: "20px 24px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                      <Label>Dimensionen-Profil</Label>
+                      <SpiderChart dimensions={spiderData.dimensions} scores={spiderData.scores} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Word Cloud */}
+                {topWords.length > 0 && (
+                  <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: "20px 24px", marginBottom: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                    <Label>Häufigste Begriffe</Label>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8, alignItems: "center" }}>
+                      {topWords.map((word, i) => {
+                        const size = Math.max(11, 22 - i * 0.7);
+                        const opacity = Math.max(0.5, 1 - i * 0.04);
+                        const colors = [C.blue, "#7B3FA0", C.pink, C.green, C.amber];
+                        const color = colors[i % colors.length];
+                        return (
+                          <span key={i} style={{ fontSize: size, fontWeight: i < 5 ? 700 : i < 10 ? 600 : 500, color, opacity, lineHeight: 1.4 }}>
+                            {word}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Individual Results */}
                 <div style={{ marginBottom: 16 }}>
                   <Label>Einzelne Antworten ({results.length} Respondenten)</Label>
@@ -1713,7 +1802,7 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
                 </div>
 
                 <div style={{ marginTop: 28, display: "flex", gap: 10 }}>
-                  <button onClick={() => { setStep(0); setResults([]); setSummary(""); setProgress(0); setPersona(personaType === "b2b" ? { ...EMPTY_PERSONA_B2B } : { ...EMPTY_PERSONA_B2C }); setTopic(""); setQuestions([""]); setPersonaMode("select"); setAuftraggeber({ ...EMPTY_AUFTRAGGEBER }); setAuftraggeberMode("select"); setGegenstand({ ...EMPTY_GEGENSTAND }); }}
+                  <button onClick={() => { setStep(0); setResults([]); setSummary(""); setProgress(0); setPersona(personaType === "b2b" ? { ...EMPTY_PERSONA_B2B } : { ...EMPTY_PERSONA_B2C }); setTopic(""); setQuestions([""]); setPersonaMode("select"); setAuftraggeber({ ...EMPTY_AUFTRAGGEBER }); setAuftraggeberMode("select"); setGegenstand({ ...EMPTY_GEGENSTAND }); setSpiderData(null); setTopWords([]); }}
                     style={{ padding: "11px 24px", borderRadius: 8, border: `1px solid ${C.border}`, background: C.bg, color: C.textMid, cursor: "pointer", fontSize: 13, fontFamily: "inherit", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
                     ↺ Neue Studie starten
                   </button>
@@ -1757,6 +1846,79 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
+
+function SpiderChart({ dimensions, scores }) {
+  const size = 160;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = 60;
+  const n = dimensions.length;
+  const levels = 5;
+
+  const angleStep = (2 * Math.PI) / n;
+  const getPoint = (i, radius) => {
+    const angle = i * angleStep - Math.PI / 2;
+    return {
+      x: cx + radius * Math.cos(angle),
+      y: cy + radius * Math.sin(angle),
+    };
+  };
+
+  // Grid lines
+  const gridPolygons = [...Array(levels)].map((_, l) => {
+    const rad = (r * (l + 1)) / levels;
+    return [...Array(n)].map((_, i) => {
+      const p = getPoint(i, rad);
+      return `${p.x},${p.y}`;
+    }).join(" ");
+  });
+
+  // Data polygon
+  const dataPoints = scores.map((s, i) => {
+    const p = getPoint(i, (s / 10) * r);
+    return `${p.x},${p.y}`;
+  }).join(" ");
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {/* Grid */}
+        {gridPolygons.map((pts, l) => (
+          <polygon key={l} points={pts} fill="none" stroke={C.borderLight} strokeWidth="0.8" />
+        ))}
+        {/* Axes */}
+        {[...Array(n)].map((_, i) => {
+          const p = getPoint(i, r);
+          return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={C.borderLight} strokeWidth="0.8" />;
+        })}
+        {/* Data */}
+        <polygon points={dataPoints} fill={`${C.blue}30`} stroke={C.blue} strokeWidth="1.5" />
+        {scores.map((s, i) => {
+          const p = getPoint(i, (s / 10) * r);
+          return <circle key={i} cx={p.x} cy={p.y} r="3" fill={C.blue} />;
+        })}
+        {/* Labels */}
+        {dimensions.map((d, i) => {
+          const p = getPoint(i, r + 14);
+          return (
+            <text key={i} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle"
+              fontSize="7" fill={C.textMid} fontFamily="Arial">
+              {d.length > 12 ? d.substring(0, 11) + "…" : d}
+            </text>
+          );
+        })}
+      </svg>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", marginTop: 4 }}>
+        {dimensions.map((d, i) => (
+          <div key={i} style={{ fontSize: 10, color: C.textMid }}>
+            <span style={{ fontWeight: 700, color: C.blue }}>{scores[i]}/10</span> {d}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
 function ImageDropZone({ bilder, onChange }) {
   const [dragging, setDragging] = useState(false);
