@@ -23,8 +23,8 @@ const C = {
   bgDark: "#0d1f35",
   green: "#16a34a",
   greenLight: "#f0fdf4",
-  amber: "#d97706",
-  amberLight: "#fffbeb",
+  amber: "#fbbf24",
+  amberLight: "#fefce8",
 };
 
 const STEPS = ["Auftraggeber", "Thema", "Persona", "Gegenstand", "Fragebogen", "Simulation", "Ergebnisse"];
@@ -331,6 +331,10 @@ function exportCSV(results, persona, topic) {
 }
 
 async function exportPDF(results, persona, topic, summary, avgNps, sentimentCounts) {
+  results = results.map(r => ({
+    ...r,
+    sentiment: r.nps >= 8 ? "positiv" : r.nps >= 4 ? "neutral" : "negativ"
+  }));
   const pdfCdns = [
     "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
     "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js",
@@ -452,95 +456,100 @@ async function loadScript(src) {
 }
 
 async function exportPPTX(results, persona, topic, summary, avgNps, sentimentCounts) {
+  // Calibrate sentiment from score
+  results = results.map(r => ({ ...r, sentiment: r.nps >= 8 ? "positiv" : r.nps >= 4 ? "neutral" : "negativ" }));
+  sentimentCounts = results.reduce((a, r) => { a[r.sentiment] = (a[r.sentiment] || 0) + 1; return a; }, {});
+
   const pptx = new PptxGenJS();
-  pptx.layout = "LAYOUT_16x9";
+  pptx.layout = "LAYOUT_16x9"; // 10 x 5.625 inches
   pptx.author = "von Neuem — Silicon Sampling";
 
+  const W = 10, H = 5.625;
   const navy = "0D1F35", blue = "0082C8", white = "FFFFFF", lightBg = "F5F8FC", textMid = "4A5568", lightBlue = "E8F4FC";
+  const green = "16A34A", yellow = "FBBF24", pink = "E5007D", grey = "8A9BB0";
 
-  // ── Slide 1: Title ──
+  // ── Slide 1: Titelfolie ──────────────────────────────────────────────────────
   let s = pptx.addSlide();
-  s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: "100%", h: "100%", fill: { color: navy } });
-  s.addShape(pptx.ShapeType.rect, { x: 0, y: 3.8, w: "100%", h: 0.06, fill: { color: blue } });
-  s.addText("Silicon Sampling", { x: 0.7, y: 0.9, w: 8, h: 1, fontSize: 44, bold: true, color: white, fontFace: "Arial" });
-  s.addText("Synthetische Marktforschung", { x: 0.7, y: 1.85, w: 8, h: 0.5, fontSize: 18, color: "7EB8D8", fontFace: "Arial" });
-  s.addText(`Persona: ${persona.label}`, { x: 0.7, y: 4.1, w: 5, h: 0.4, fontSize: 13, color: white, fontFace: "Arial", bold: true });
-  s.addText(`Thema: ${topic}`, { x: 0.7, y: 4.55, w: 8.5, h: 0.35, fontSize: 12, color: "7EB8D8", fontFace: "Arial" });
-  const werteTxt = Array.isArray(persona.werte) ? persona.werte.join(" · ") : persona.werte;
-  const lsTxt = Array.isArray(persona.lebensstil) ? persona.lebensstil.join(" · ") : persona.lebensstil;
-  if (werteTxt) s.addText(`Werte: ${werteTxt}`, { x: 0.7, y: 4.93, w: 9, h: 0.28, fontSize: 9, color: "4A8FC4", fontFace: "Arial" });
-  s.addText(`${results.length} Respondenten  ·  ${new Date().toLocaleDateString("de-DE")}`, { x: 0.7, y: 5.28, w: 6, h: 0.28, fontSize: 10, color: "4A6A8A", fontFace: "Arial" });
-  s.addText("von Neuem", { x: 7.5, y: 5.05, w: 2.3, h: 0.4, fontSize: 15, italic: true, color: "4A8FC4", fontFace: "Georgia" });
+  s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: H, fill: { color: navy } });
+  s.addShape(pptx.ShapeType.rect, { x: 0, y: 3.2, w: W, h: 0.05, fill: { color: blue } });
+  s.addText("Silicon Sampling", { x: 0.7, y: 0.6, w: 8.6, h: 1.0, fontSize: 40, bold: true, color: white, fontFace: "Arial" });
+  s.addText("Synthetische Marktforschung · von Neuem", { x: 0.7, y: 1.55, w: 8.6, h: 0.45, fontSize: 16, color: "7EB8D8", fontFace: "Arial" });
+  s.addText(`Auftraggeber: ${persona.label}`, { x: 0.7, y: 3.4, w: 8.6, h: 0.35, fontSize: 12, color: white, bold: true, fontFace: "Arial" });
+  s.addText(`Thema: ${topic}`, { x: 0.7, y: 3.8, w: 8.6, h: 0.3, fontSize: 11, color: "7EB8D8", fontFace: "Arial" });
+  s.addText(`${results.length} Respondenten  ·  ${new Date().toLocaleDateString("de-DE")}`, { x: 0.7, y: 5.1, w: 8.6, h: 0.3, fontSize: 9, color: "4A6A8A", fontFace: "Arial" });
 
-  // ── Slide 2: KPIs ──
+  // ── Slide 2: KPIs + Score-Verteilung ────────────────────────────────────────
   s = pptx.addSlide();
-  s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: "100%", h: 0.9, fill: { color: navy } });
-  s.addText("Ergebnisübersicht", { x: 0.5, y: 0.18, w: 9, h: 0.55, fontSize: 20, bold: true, color: white, fontFace: "Arial" });
-  const kpiData = [
+  s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.75, fill: { color: navy } });
+  s.addText("Ergebnisübersicht", { x: 0.4, y: 0.12, w: 9.2, h: 0.5, fontSize: 18, bold: true, color: white, fontFace: "Arial" });
+
+  // KPI boxes
+  const kpis = [
     { label: "Ø Bewertung", value: `${avgNps}/10`, color: blue },
-    { label: "Positiv", value: `${sentimentCounts["positiv"] || 0}`, color: "16A34A" },
-    { label: "Neutral", value: `${sentimentCounts["neutral"] || 0}`, color: "D97706" },
-    { label: "Negativ", value: `${sentimentCounts["negativ"] || 0}`, color: "E5007D" },
+    { label: "Positiv", value: `${sentimentCounts["positiv"] || 0}`, color: green },
+    { label: "Neutral", value: `${sentimentCounts["neutral"] || 0}`, color: yellow },
+    { label: "Negativ", value: `${sentimentCounts["negativ"] || 0}`, color: pink },
   ];
-  kpiData.forEach((k, i) => {
-    const x = 0.4 + i * 2.4;
-    s.addShape(pptx.ShapeType.rect, { x, y: 1.1, w: 2.2, h: 1.5, fill: { color: lightBg }, line: { color: "DDE6EF", pt: 1 } });
-    s.addText(k.value, { x, y: 1.25, w: 2.2, h: 0.75, fontSize: 32, bold: true, color: k.color, fontFace: "Arial", align: "center" });
-    s.addText(k.label.toUpperCase(), { x, y: 2.05, w: 2.2, h: 0.35, fontSize: 8, color: "8A9BB0", fontFace: "Arial", align: "center", bold: true });
+  kpis.forEach((k, i) => {
+    const x = 0.3 + i * 2.37;
+    s.addShape(pptx.ShapeType.rect, { x, y: 0.9, w: 2.2, h: 1.2, fill: { color: lightBg }, line: { color: "DDE6EF", pt: 1 } });
+    s.addText(k.value, { x, y: 0.95, w: 2.2, h: 0.7, fontSize: 28, bold: true, color: k.color, fontFace: "Arial", align: "center" });
+    s.addText(k.label.toUpperCase(), { x, y: 1.7, w: 2.2, h: 0.25, fontSize: 7, color: grey, fontFace: "Arial", align: "center", bold: true });
   });
 
-  // Score-Verteilung — Säulendiagramm mit Grundlinie
-  s.addText("SCORE-VERTEILUNG", { x: 0.4, y: 2.85, w: 9, h: 0.3, fontSize: 8, color: "8A9BB0", bold: true, fontFace: "Arial" });
-  const baselineY = 6.5;
-  const maxBarH = 2.8;
-  const pptxCounts = [...Array(11)].map((_, sc) => results.filter(r => r.nps === sc).length);
-  const pptxMax = Math.max(...pptxCounts, 1);
-  const colW = 0.72;
-  const colGap = 0.15;
-  const chartX = 0.5;
+  // Score-Verteilung Säulendiagramm
+  s.addText("SCORE-VERTEILUNG", { x: 0.3, y: 2.25, w: 9, h: 0.25, fontSize: 7, color: grey, bold: true, fontFace: "Arial" });
+  const baseY = 5.0;
+  const maxH = 2.3;
+  const pCounts = [...Array(11)].map((_, sc) => results.filter(r => r.nps === sc).length);
+  const pMax = Math.max(...pCounts, 1);
+  const cW = 0.72, cG = 0.12, cX = 0.4;
   // Grundlinie
-  s.addShape(pptx.ShapeType.rect, { x: chartX, y: baselineY, w: (colW + colGap) * 11, h: 0.02, fill: { color: "BBBBBB" } });
-  pptxCounts.forEach((count, sc) => {
-    const x = chartX + sc * (colW + colGap);
-    const h = count > 0 ? Math.max(0.12, (count / pptxMax) * maxBarH) : 0.02;
-    const bColor = sc >= 8 ? "16A34A" : sc >= 4 ? "D97706" : "E5007D";
-    s.addShape(pptx.ShapeType.rect, { x, y: baselineY - h, w: colW, h, fill: { color: count > 0 ? bColor : "EEEEEE" } });
-    if (count > 0) s.addText(`${count}`, { x, y: baselineY - h - 0.22, w: colW, h: 0.2, fontSize: 7, color: bColor, fontFace: "Arial", align: "center", bold: true });
-    s.addText(`${sc}`, { x, y: baselineY + 0.06, w: colW, h: 0.2, fontSize: 7, color: "8A9BB0", fontFace: "Arial", align: "center" });
+  s.addShape(pptx.ShapeType.rect, { x: cX, y: baseY, w: (cW + cG) * 11 - cG, h: 0.02, fill: { color: "BBBBBB" } });
+  pCounts.forEach((count, sc) => {
+    const x = cX + sc * (cW + cG);
+    const h = count > 0 ? Math.max(0.1, (count / pMax) * maxH) : 0.02;
+    const bc = sc >= 8 ? green : sc >= 4 ? yellow : (sc >= 1 ? pink : "DDDDDD");
+    s.addShape(pptx.ShapeType.rect, { x, y: baseY - h, w: cW, h, fill: { color: count > 0 ? bc : "EEEEEE" } });
+    if (count > 0) s.addText(`${count}`, { x, y: baseY - h - 0.18, w: cW, h: 0.18, fontSize: 7, color: bc, fontFace: "Arial", align: "center", bold: true });
+    s.addText(`${sc}`, { x, y: baseY + 0.04, w: cW, h: 0.18, fontSize: 6, color: grey, fontFace: "Arial", align: "center" });
   });
-  s.addText("● Kritisch (1–3)", { x: 0.4, y: 7.0, w: 2.8, h: 0.2, fontSize: 7, color: "E5007D", fontFace: "Arial" });
-  s.addText("● Neutral (4–7)", { x: 3.4, y: 7.0, w: 2.8, h: 0.2, fontSize: 7, color: "D97706", fontFace: "Arial" });
-  s.addText("● Positiv (8–10)", { x: 6.4, y: 7.0, w: 3, h: 0.2, fontSize: 7, color: "16A34A", fontFace: "Arial" });
+  s.addText("● Kritisch (1–3)", { x: 0.3, y: 5.3, w: 3, h: 0.18, fontSize: 7, color: pink, fontFace: "Arial" });
+  s.addText("● Neutral (4–7)", { x: 3.5, y: 5.3, w: 3, h: 0.18, fontSize: 7, color: yellow, fontFace: "Arial" });
+  s.addText("● Positiv (8–10)", { x: 6.8, y: 5.3, w: 3, h: 0.18, fontSize: 7, color: green, fontFace: "Arial" });
 
-  // ── Slide 3: Executive Summary ──
+  // ── Slide 3: Executive Summary ───────────────────────────────────────────────
   if (summary) {
     s = pptx.addSlide();
-    s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: "100%", h: 0.9, fill: { color: navy } });
-    s.addText("Executive Summary", { x: 0.5, y: 0.18, w: 9, h: 0.55, fontSize: 20, bold: true, color: white, fontFace: "Arial" });
-    s.addShape(pptx.ShapeType.rect, { x: 0.4, y: 1.05, w: 9.2, h: 4.8, fill: { color: lightBlue }, line: { color: "CCE6F5", pt: 1 } });
-    s.addText(summary, { x: 0.65, y: 1.2, w: 8.7, h: 4.5, fontSize: 11, color: navy, fontFace: "Arial", valign: "top" });
+    s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.75, fill: { color: navy } });
+    s.addText("Executive Summary", { x: 0.4, y: 0.12, w: 9.2, h: 0.5, fontSize: 18, bold: true, color: white, fontFace: "Arial" });
+    s.addShape(pptx.ShapeType.rect, { x: 0.4, y: 0.9, w: 9.2, h: 4.5, fill: { color: lightBlue }, line: { color: "CCE6F5", pt: 1 } });
+    s.addText(summary, { x: 0.6, y: 1.0, w: 8.8, h: 4.3, fontSize: 10, color: navy, fontFace: "Arial", valign: "top" });
   }
 
-  // ── Slides: Individual results (1 per slide) ──
+  // ── Slides: Respondenten ─────────────────────────────────────────────────────
   results.forEach((r) => {
     s = pptx.addSlide();
-    s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: "100%", h: 0.9, fill: { color: navy } });
-    const sentColor = r.sentiment === "positiv" ? "16A34A" : r.sentiment === "negativ" ? "E5007D" : "D97706";
-    s.addText(`Respondent #${r.id}`, { x: 0.5, y: 0.18, w: 6, h: 0.55, fontSize: 20, bold: true, color: white, fontFace: "Arial" });
-    s.addText(r.sentiment, { x: 6.5, y: 0.22, w: 1.5, h: 0.4, fontSize: 11, bold: true, color: sentColor, fontFace: "Arial", align: "center" });
-    s.addText(`Score ${r.nps}/10`, { x: 8.2, y: 0.22, w: 1.5, h: 0.4, fontSize: 11, bold: true, color: "7EB8D8", fontFace: "Arial", align: "center" });
-    let ay = 1.1;
+    s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.75, fill: { color: navy } });
+    const sc = r.sentiment === "positiv" ? green : r.sentiment === "negativ" ? pink : yellow;
+    s.addText(`Respondent #${r.id}`, { x: 0.4, y: 0.12, w: 6, h: 0.5, fontSize: 18, bold: true, color: white, fontFace: "Arial" });
+    s.addText(r.sentiment, { x: 7.0, y: 0.15, w: 1.4, h: 0.4, fontSize: 10, bold: true, color: sc, fontFace: "Arial", align: "center" });
+    s.addText(`Score ${r.nps}/10`, { x: 8.4, y: 0.15, w: 1.3, h: 0.4, fontSize: 10, bold: true, color: "7EB8D8", fontFace: "Arial", align: "center" });
+    let ay = 0.9;
     (r.answers || []).forEach(a => {
-      if (ay > 6.8) return;
-      s.addText(a.question, { x: 0.5, y: ay, w: 9.3, h: 0.35, fontSize: 9, bold: true, color: navy, fontFace: "Arial" });
-      ay += 0.35;
-      s.addText(a.answer || "–", { x: 0.5, y: ay, w: 9.3, h: 0.6, fontSize: 9, color: textMid, fontFace: "Arial", valign: "top" });
-      ay += 0.7;
+      if (ay > 5.4) return;
+      s.addText(a.question, { x: 0.4, y: ay, w: 9.2, h: 0.3, fontSize: 8, bold: true, color: navy, fontFace: "Arial" });
+      ay += 0.3;
+      const answerLines = a.answer || "–";
+      const lineH = Math.min(0.55, Math.max(0.25, answerLines.length / 120));
+      s.addText(answerLines, { x: 0.4, y: ay, w: 9.2, h: lineH, fontSize: 8, color: textMid, fontFace: "Arial", valign: "top" });
+      ay += lineH + 0.1;
     });
   });
 
   pptx.writeFile({ fileName: `silicon-sampling_${persona.label.replace(/\s+/g, "-")}_${Date.now()}.pptx` });
 }
+
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
@@ -750,7 +759,12 @@ NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|ne
           try { return { id, ...JSON.parse(text.replace(/```json|```/g, "").trim()) }; }
           catch { return { id, answers: validQs.map(q => ({ question: q, answer: "–" })), sentiment: "neutral", nps: 5 }; }
         }));
-        collected.push(...batch);
+        // Recalculate sentiment from score to ensure consistency
+        const calibrated = batch.map(r => ({
+          ...r,
+          sentiment: r.nps >= 8 ? "positiv" : r.nps >= 4 ? "neutral" : "negativ"
+        }));
+        collected.push(...calibrated);
         setProgress(Math.round((collected.length / total) * 100));
         setResults([...collected]);
         await new Promise(r => setTimeout(r, 150));
@@ -816,9 +830,11 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
   const handleExport = async (type) => {
     setExporting(type);
     try {
-      if (type === "csv") exportCSV(results, persona, topic);
-      else if (type === "pdf") await exportPDF(results, persona, topic, summary, avgNps, sentimentCounts);
-      else if (type === "pptx") await exportPPTX(results, persona, topic, summary, avgNps, sentimentCounts);
+      const calibrated = results.map(r => ({ ...r, sentiment: r.nps >= 8 ? "positiv" : r.nps >= 4 ? "neutral" : "negativ" }));
+      const calSentCounts = calibrated.reduce((a, r) => { a[r.sentiment] = (a[r.sentiment] || 0) + 1; return a; }, {});
+      if (type === "csv") exportCSV(calibrated, persona, topic);
+      else if (type === "pdf") await exportPDF(calibrated, persona, topic, summary, avgNps, calSentCounts);
+      else if (type === "pptx") await exportPPTX(calibrated, persona, topic, summary, avgNps, calSentCounts);
     } catch (e) { console.error(e); }
     setExporting("");
   };
