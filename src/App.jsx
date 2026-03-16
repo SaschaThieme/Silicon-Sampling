@@ -256,7 +256,7 @@ const PERSONA_PRESETS_B2C = [
   {
     label: "Mittelständische Familie", alter: "35–54", einkommen: "60.000–120.000 €/Jahr",
     bildung: "Hochschulabschluss", region: "Deutschland (Suburban/Ländlich)",
-    haushaltstyp: "familie",
+    haushaltstyp: ["familie"],
     werte: ["Sicherheit", "Stabilität", "Familie", "Zuverlässigkeit", "Qualität"],
     lebensstil: ["Suburban & Familienorientiert", "Heimorientiert & Gemütlich"],
     kaufverhalten: ["Risikoavers & Markentreu"],
@@ -265,7 +265,7 @@ const PERSONA_PRESETS_B2C = [
   {
     label: "Junger Mittelstand", alter: "25–38", einkommen: "35.000–70.000 €/Jahr",
     bildung: "Hochschulabschluss", region: "Mittelgroße Stadt / Speckgürtel",
-    haushaltstyp: "paar",
+    haushaltstyp: ["paar"],
     werte: ["Freiheit", "Selbstverwirklichung", "Wachstum", "Qualität", "Pragmatismus"],
     lebensstil: ["Karrierefokussiert", "Reiseaffin & Weltgewandt", "Digital & Social-Media-Affin"],
     kaufverhalten: ["Recherchestark & Informationsgetrieben"],
@@ -274,7 +274,7 @@ const PERSONA_PRESETS_B2C = [
   {
     label: "Urban Millennial", alter: "25–38", einkommen: "30.000–65.000 €/Jahr",
     bildung: "Hochschulabschluss", region: "Großstadt (Berlin, München, Hamburg)",
-    haushaltstyp: "single",
+    haushaltstyp: ["single"],
     werte: ["Freiheit", "Selbstverwirklichung", "Innovation", "Solidarität", "Originalität"],
     lebensstil: ["Urban & Vernetzt", "Digital & Social-Media-Affin", "Reiseaffin & Weltgewandt", "Nachhaltiger Konsum"],
     kaufverhalten: ["Community-Getrieben & Social-Proof", "Nachhaltigkeitsorientiert"],
@@ -675,7 +675,7 @@ const STIMMUNGEN = ["eher skeptisch heute", "offen und neugierig", "pragmatisch 
 const PERSPEKTIVEN = ["legt heute besonders viel Wert auf Preis", "denkt gerade viel an Qualität", "hat kürzlich ein ähnliches Produkt genutzt", "hat das Thema gerade im Freundeskreis diskutiert", "kennt das Produkt bisher nur vom Hören", "hat konkrete Alternativen im Kopf", "ist zum ersten Mal mit diesem Thema konfrontiert", "hat bereits Kauferfahrung in dieser Kategorie", "ist durch eine Empfehlung auf das Thema gekommen", "recherchiert gerade aktiv in dieser Kategorie"];
 
 const EMPTY_AUFTRAGGEBER = { name: "", branche: "", url: "", beschreibung: "" };
-const EMPTY_PERSONA_B2C = { label: "", alter: "", geschlecht: [], einkommen: "", bildung: "", region: "", haushaltstyp: "", werte: [], lebensstil: [], kaufverhalten: [], bevoelkerung: "" };
+const EMPTY_PERSONA_B2C = { label: "", alter: "", geschlecht: [], einkommen: "", bildung: "", region: "", haushaltstyp: [], werte: [], lebensstil: [], kaufverhalten: [], bevoelkerung: "" };
 const EMPTY_PERSONA_B2B = { label: "", type: "b2b", branche: "", mitarbeiter: "", umsatz: "", region: "", strategischeAusrichtung: "", buyingCenterRolle: [], hierarchie: "", budget: "", kaufverhalten: [], preisorientierung: "", anbieterloyalitaet: "", informationsquellen: [], onlineAffinitaet: "" };
 const EMPTY_GEGENSTAND = { name: "", beschreibung: "", preis: "", bilder: [] };
 
@@ -823,7 +823,7 @@ export default function SiliconSamplingApp() {
     const validQs = questions.filter(q => q.trim());
     const total = sampleSize; const collected = [];
 
-    const haushaltsLabel = HAUSHALTSTYP_OPTIONS.find(h => h.value === persona.haushaltstyp)?.label || "";
+    const haushaltsLabel = Array.isArray(persona.haushaltstyp) ? persona.haushaltstyp.map(v => HAUSHALTSTYP_OPTIONS.find(h => h.value === v)?.label || v).join(", ") : (HAUSHALTSTYP_OPTIONS.find(h => h.value === persona.haushaltstyp)?.label || "");
     const stratLabel = B2B_STRATEGISCHE_AUSRICHTUNG.find(s => s.value === persona.strategischeAusrichtung)?.label || "";
 
     const getSeed = (id) => {
@@ -852,8 +852,12 @@ Der Score (0-10) ergibt sich aus deiner echten Einschätzung als diese Persona �
 NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|neutral|negativ","nps":<0-10>}`
       : `Du wirst befragt im Auftrag von: ${auftraggeber.name}${auftraggeber.beschreibung ? " — " + auftraggeber.beschreibung : ""}.
 Du bist eine synthetische B2C-Marktforschungs-Persona:
-- Geschlecht: ${persona.geschlecht?.length > 0 ? persona.geschlecht.join(", ") : "nicht spezifiziert"}  - Alter: ${persona.alter}  - Einkommen: ${persona.einkommen}  - Bildung: ${persona.bildung}
-- Region: ${persona.region}  - Haushaltstyp: ${haushaltsLabel}
+- Zielgruppe: ${persona.label}
+- Alter: ${persona.alter} (wähle für diesen Respondenten ein konkretes Alter in diesem Bereich)
+- Geschlecht: ${persona.geschlecht?.length > 0 ? "Wähle eines aus: " + persona.geschlecht.join(", ") : "beliebig"}
+- Einkommen: ${persona.einkommen}  - Bildung: ${persona.bildung}
+- Region: ${persona.region}
+- Haushaltstyp: ${haushaltsLabel ? "Wähle einen aus: " + haushaltsLabel : "beliebig"}
 - Werte: ${Array.isArray(persona.werte) ? persona.werte.join(", ") : persona.werte}
 - Lebensstil: ${Array.isArray(persona.lebensstil) ? persona.lebensstil.join(", ") : persona.lebensstil}
 - Kaufverhalten: ${Array.isArray(persona.kaufverhalten) ? persona.kaufverhalten.join(", ") : persona.kaufverhalten}
@@ -1305,7 +1309,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {savedPersonas.filter(p => personaType === "b2b" ? p.type === "b2b" : p.type !== "b2b").map((p, i) => {
                         const isB2B = p.type === "b2b";
-                        const ht = !isB2B ? HAUSHALTSTYP_OPTIONS.find(h => h.value === p.haushaltstyp) : null;
+                        const htArr = !isB2B ? (Array.isArray(p.haushaltstyp) ? p.haushaltstyp : (p.haushaltstyp ? [p.haushaltstyp] : [])) : []; const ht = htArr.length > 0 ? { label: htArr.map(v => HAUSHALTSTYP_OPTIONS.find(h => h.value === v)?.label || v).join(", ") } : null;
                         return (
                           <div key={i} style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
                             <div style={{ flex: 1 }}>
@@ -1382,7 +1386,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                       {persona.geschlecht?.length > 0 && <span style={{ fontSize: 11, color: C.blue, fontWeight: 700 }}>{persona.geschlecht.join(", ")}</span>}
                     </div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {["Weiblich", "Männlich", "Divers / Nicht-binär", "Keine Angabe"].map(g => {
+                      {["Weiblich", "Männlich", "Divers / Nicht-binär"].map(g => {
                         const sel = persona.geschlecht?.includes(g);
                         return (
                           <button key={g} onClick={() => setPersona(p => ({ ...p, geschlecht: sel ? (p.geschlecht||[]).filter(x => x !== g) : [...(p.geschlecht||[]), g] }))}
@@ -1394,23 +1398,30 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                     </div>
                   </div>
 
-                  {/* Haushaltstyp */}
+                  {/* Haushaltstyp Multi-Select */}
                   <div style={{ marginBottom: 20 }}>
-                    <Label>Haushaltstyp</Label>
-                    <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                      <Label>Haushaltstyp</Label>
+                      <span style={{ fontSize: 11, color: C.textLight }}>Mehrere wählbar</span>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
                       {HAUSHALTSTYP_OPTIONS.map(ht => {
-                        const sel = persona.haushaltstyp === ht.value;
+                        const htArr = Array.isArray(persona.haushaltstyp) ? persona.haushaltstyp : (persona.haushaltstyp ? [persona.haushaltstyp] : []);
+                        const sel = htArr.includes(ht.value);
                         return (
-                          <div key={ht.value} onClick={() => setPersona(p => ({ ...p, haushaltstyp: sel ? "" : ht.value }))} style={{
-                            flex: 1, padding: "12px 14px", borderRadius: 10, cursor: "pointer",
+                          <div key={ht.value} onClick={() => setPersona(p => {
+                            const arr = Array.isArray(p.haushaltstyp) ? p.haushaltstyp : (p.haushaltstyp ? [p.haushaltstyp] : []);
+                            return { ...p, haushaltstyp: sel ? arr.filter(x => x !== ht.value) : [...arr, ht.value] };
+                          })} style={{
+                            padding: "10px 12px", borderRadius: 10, cursor: "pointer",
                             border: `2px solid ${sel ? C.blue : C.border}`,
                             background: sel ? C.blueLight : C.bg,
                             textAlign: "center", transition: "all 0.15s",
                             boxShadow: sel ? `0 0 0 1px ${C.blue}` : "none",
                           }}>
-                            <div style={{ display: "flex", justifyContent: "center", marginBottom: 5 }}><ht.Icon size={20} color={sel ? C.blue : C.textMid} /></div>
-                            <div style={{ fontSize: 12, fontWeight: sel ? 700 : 500, color: sel ? C.blue : C.text }}>{ht.label}</div>
-                            <div style={{ fontSize: 10, color: C.textLight, marginTop: 2 }}>{ht.desc}</div>
+                            <div style={{ display: "flex", justifyContent: "center", marginBottom: 4 }}><ht.Icon size={18} color={sel ? C.blue : C.textMid} /></div>
+                            <div style={{ fontSize: 11, fontWeight: sel ? 700 : 500, color: sel ? C.blue : C.text }}>{ht.label}</div>
+                            <div style={{ fontSize: 9, color: C.textLight, marginTop: 1 }}>{ht.desc}</div>
                           </div>
                         );
                       })}
