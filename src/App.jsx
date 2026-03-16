@@ -142,9 +142,9 @@ const B2B_ONLINE_AFFINITAET = ["Digital-first (Online-Kanäle bevorzugt)", "Hybr
 const PERSONA_PRESETS_SINUS = [
   {
     label: "Konservativ-Etablierte", sinus: true,
-    alter: "50–70", einkommen: "80.000–180.000 €/Jahr",
-    bildung: "Hochschulabschluss", region: "Deutschland (suburban/ländlich)",
-    haushaltstyp: "ehepaar", geschlecht: [],
+    alter: "14–99", einkommen: "80.000–180.000 €/Jahr",
+    bildung: "Hochschulabschluss", region: "Deutschland",
+    haushaltstyp: ["single", "paar", "ehepaar", "familie", "wg", "alleinerziehend"], geschlecht: ["Weiblich", "Männlich", "Divers / Nicht-binär"],
     werte: ["Ordnung", "Tradition", "Pflicht", "Stabilität", "Qualität", "Integrität"],
     lebensstil: ["Heimorientiert & Gemütlich", "Kulturinteressiert"],
     kaufverhalten: ["Qualitätsorientiert & Langfristig", "Risikoavers & Markentreu"],
@@ -153,9 +153,9 @@ const PERSONA_PRESETS_SINUS = [
   },
   {
     label: "Liberal-Intellektuelle", sinus: true,
-    alter: "40–65", einkommen: "60.000–120.000 €/Jahr",
-    bildung: "Hochschulabschluss", region: "Großstadt",
-    haushaltstyp: "paar", geschlecht: [],
+    alter: "14–99", einkommen: "60.000–120.000 €/Jahr",
+    bildung: "Hochschulabschluss", region: "Deutschland",
+    haushaltstyp: ["single", "paar", "ehepaar", "familie", "wg", "alleinerziehend"], geschlecht: ["Weiblich", "Männlich", "Divers / Nicht-binär"],
     werte: ["Freiheit", "Bildung", "Toleranz", "Nachhaltigkeit", "Kreativität", "Gerechtigkeit"],
     lebensstil: ["Urban & Vernetzt", "Kulturinteressiert", "Nachhaltiger Konsum"],
     kaufverhalten: ["Recherchestark & Informationsgetrieben", "Nachhaltigkeitsorientiert"],
@@ -164,9 +164,9 @@ const PERSONA_PRESETS_SINUS = [
   },
   {
     label: "Performer", sinus: true,
-    alter: "30–50", einkommen: "80.000–200.000 €/Jahr",
-    bildung: "Hochschulabschluss", region: "Großstadt / Speckgürtel",
-    haushaltstyp: "paar", geschlecht: [],
+    alter: "14–99", einkommen: "80.000–200.000 €/Jahr",
+    bildung: "Hochschulabschluss", region: "Deutschland",
+    haushaltstyp: ["single", "paar", "ehepaar", "familie", "wg", "alleinerziehend"], geschlecht: ["Weiblich", "Männlich", "Divers / Nicht-binär"],
     werte: ["Erfolg", "Effizienz", "Innovation", "Leistung", "Freiheit", "Status"],
     lebensstil: ["Karrierefokussiert", "Digital-First & Convenience", "Reiseaffin & Weltgewandt"],
     kaufverhalten: ["Statusorientiert & Premium", "Digital-First & Convenience"],
@@ -175,9 +175,9 @@ const PERSONA_PRESETS_SINUS = [
   },
   {
     label: "Expeditive", sinus: true,
-    alter: "20–35", einkommen: "25.000–60.000 €/Jahr",
-    bildung: "Hochschulabschluss", region: "Großstadt",
-    haushaltstyp: "single", geschlecht: [],
+    alter: "14–99", einkommen: "25.000–60.000 €/Jahr",
+    bildung: "Hochschulabschluss", region: "Deutschland",
+    haushaltstyp: ["single", "paar", "ehepaar", "familie", "wg", "alleinerziehend"], geschlecht: ["Weiblich", "Männlich", "Divers / Nicht-binär"],
     werte: ["Freiheit", "Originalität", "Selbstverwirklichung", "Innovation", "Abenteuer"],
     lebensstil: ["Urban & Vernetzt", "Digital & Social-Media-Affin", "Kreativ & Kunstbegeistert"],
     kaufverhalten: ["Community-Getrieben & Social-Proof", "Digital-First & Convenience"],
@@ -186,9 +186,9 @@ const PERSONA_PRESETS_SINUS = [
   },
   {
     label: "Sozialökologische", sinus: true,
-    alter: "35–60", einkommen: "30.000–70.000 €/Jahr",
-    bildung: "Hochschulabschluss", region: "Mittelgroße Stadt",
-    haushaltstyp: "familie", geschlecht: [],
+    alter: "14–99", einkommen: "30.000–70.000 €/Jahr",
+    bildung: "Hochschulabschluss", region: "Deutschland",
+    haushaltstyp: ["single", "paar", "ehepaar", "familie", "wg", "alleinerziehend"], geschlecht: ["Weiblich", "Männlich", "Divers / Nicht-binär"],
     werte: ["Nachhaltigkeit", "Gerechtigkeit", "Solidarität", "Gemeinschaft", "Verantwortung"],
     lebensstil: ["Nachhaltiger Konsum", "Ehrenamt & Gesellschaftliches Engagement", "Kulturinteressiert"],
     kaufverhalten: ["Nachhaltigkeitsorientiert", "Recherchestark & Informationsgetrieben"],
@@ -197,9 +197,9 @@ const PERSONA_PRESETS_SINUS = [
   },
   {
     label: "Bürgerliche Mitte", sinus: true,
-    alter: "35–60", einkommen: "35.000–70.000 €/Jahr",
-    bildung: "Mittlere Reife / Realschulabschluss", region: "Mittelgroße Stadt / Suburban",
-    haushaltstyp: "familie", geschlecht: [],
+    alter: "14–99", einkommen: "35.000–70.000 €/Jahr",
+    bildung: "Mittlere Reife / Realschulabschluss", region: "Deutschland",
+    haushaltstyp: ["single", "paar", "ehepaar", "familie", "wg", "alleinerziehend"], geschlecht: ["Weiblich", "Männlich", "Divers / Nicht-binär"],
     werte: ["Sicherheit", "Familie", "Ordnung", "Verlässlichkeit", "Harmonie"],
     lebensstil: ["Suburban & Familienorientiert", "Heimorientiert & Gemütlich"],
     kaufverhalten: ["Risikoavers & Markentreu", "Qualitätsorientiert & Langfristig"],
@@ -208,9 +208,9 @@ const PERSONA_PRESETS_SINUS = [
   },
   {
     label: "Adaptiv-Pragmatische", sinus: true,
-    alter: "25–45", einkommen: "30.000–65.000 €/Jahr",
-    bildung: "Fachhochschulreife / Abitur", region: "Mittelgroße Stadt",
-    haushaltstyp: "paar", geschlecht: [],
+    alter: "14–99", einkommen: "30.000–65.000 €/Jahr",
+    bildung: "Fachhochschulreife / Abitur", region: "Deutschland",
+    haushaltstyp: ["single", "paar", "ehepaar", "familie", "wg", "alleinerziehend"], geschlecht: ["Weiblich", "Männlich", "Divers / Nicht-binär"],
     werte: ["Pragmatismus", "Flexibilität", "Sicherheit", "Lebensqualität", "Freundschaft"],
     lebensstil: ["Digital & Social-Media-Affin", "Sportlich & Aktiv", "Genuss & Kulinarik"],
     kaufverhalten: ["Preissensibel & Schnäppchenjäger", "Digital-First & Convenience"],
@@ -219,9 +219,9 @@ const PERSONA_PRESETS_SINUS = [
   },
   {
     label: "Traditionelle", sinus: true,
-    alter: "60–80", einkommen: "20.000–40.000 €/Jahr",
-    bildung: "Hauptschulabschluss", region: "Ländlich / Kleinstädte",
-    haushaltstyp: "ehepaar", geschlecht: [],
+    alter: "14–99", einkommen: "20.000–40.000 €/Jahr",
+    bildung: "Hauptschulabschluss", region: "Deutschland",
+    haushaltstyp: ["single", "paar", "ehepaar", "familie", "wg", "alleinerziehend"], geschlecht: ["Weiblich", "Männlich", "Divers / Nicht-binär"],
     werte: ["Tradition", "Pflicht", "Bescheidenheit", "Ordnung", "Familie", "Sparsamkeit"],
     lebensstil: ["Heimorientiert & Gemütlich", "Ländlich & Naturverbunden"],
     kaufverhalten: ["Traditionell & Loyalitätsstark", "Risikoavers & Markentreu"],
@@ -230,9 +230,9 @@ const PERSONA_PRESETS_SINUS = [
   },
   {
     label: "Prekäre", sinus: true,
-    alter: "25–55", einkommen: "< 20.000 €/Jahr",
-    bildung: "Hauptschulabschluss", region: "Kleinstädte / städtische Randlagen",
-    haushaltstyp: "single", geschlecht: [],
+    alter: "14–99", einkommen: "< 20.000 €/Jahr",
+    bildung: "Hauptschulabschluss", region: "Deutschland",
+    haushaltstyp: ["single", "paar", "ehepaar", "familie", "wg", "alleinerziehend"], geschlecht: ["Weiblich", "Männlich", "Divers / Nicht-binär"],
     werte: ["Sicherheit", "Zugehörigkeit", "Respekt", "Würde", "Familie"],
     lebensstil: ["Heimorientiert & Gemütlich"],
     kaufverhalten: ["Preissensibel & Schnäppchenjäger", "Traditionell & Loyalitätsstark"],
@@ -241,9 +241,9 @@ const PERSONA_PRESETS_SINUS = [
   },
   {
     label: "Hedonistische", sinus: true,
-    alter: "15–35", einkommen: "15.000–35.000 €/Jahr",
-    bildung: "Hauptschulabschluss", region: "Großstadt / Mittelgroße Stadt",
-    haushaltstyp: "single", geschlecht: [],
+    alter: "14–99", einkommen: "15.000–35.000 €/Jahr",
+    bildung: "Hauptschulabschluss", region: "Deutschland",
+    haushaltstyp: ["single", "paar", "ehepaar", "familie", "wg", "alleinerziehend"], geschlecht: ["Weiblich", "Männlich", "Divers / Nicht-binär"],
     werte: ["Spaß", "Freiheit", "Spontanität", "Genuss", "Gemeinschaft", "Erlebnis"],
     lebensstil: ["Digital & Social-Media-Affin", "Gaming & Tech-Affin", "Sportlich & Aktiv"],
     kaufverhalten: ["Impulsiv & Spontan", "Community-Getrieben & Social-Proof"],
@@ -1280,7 +1280,7 @@ Für topWords: Die 15 häufigsten inhaltlich relevanten Wörter aus den Antworte
                             style={{ position: "absolute", top: 7, right: 8, background: "none", border: "none", cursor: "pointer", fontSize: 13, color: C.textLight, lineHeight: 1, padding: "2px 4px", borderRadius: 4 }}
                             title="Vorlage ausblenden">✕</button>
                           <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 4, paddingRight: 18 }}>{p.label}</div>
-                          {!isGenOnly && (
+                          {!isGenOnly && !p.sinus && (
                             personaType === "b2c"
                               ? <div style={{ fontSize: 11, color: C.textMid }}>{p.alter} · {ht?.label}</div>
                               : <div style={{ fontSize: 11, color: C.textMid }}>{p.branche} · {p.mitarbeiter?.split(" ")[0]}</div>
