@@ -872,44 +872,44 @@ Der Score (0-10) ergibt sich aus deiner echten Haltung als diese Persona — nic
 NUR JSON: {"answers":[{"question":"...","answer":"..."}],"sentiment":"positiv|neutral|negativ","nps":<0-10>}`;
 
     try {
-      const batchSize = 1;
-      for (let b = 0; b < Math.ceil(total / batchSize); b++) {
-        const cur = Math.min(batchSize, total - b * batchSize);
-        const batch = await Promise.all(Array.from({ length: cur }, async (_, i) => {
-          const id = b * batchSize + i + 1;
-          let respondentResult = null;
-          for (let attempt = 0; attempt < 2; attempt++) {
-            try {
-              const resp = await fetch("/api/anthropic", {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1200, system: buildPrompt(id),
-                  messages: [{ role: "user", content: `Befragung ${id}/${total}:\n${validQs.map((q, qi) => `F${qi + 1}: ${q}`).join("\n")}\n\nANTWORTE NUR MIT VALIDEM JSON.` }] }),
-              });
-              if (!resp.ok) continue;
-              const data = await resp.json();
-              const text = data.content?.find(c => c.type === "text")?.text || "";
-              const cleaned = text.replace(/```json|```/g, "").trim();
-              const j1 = cleaned.indexOf("{"), j2 = cleaned.lastIndexOf("}");
-              if (j1 > -1 && j2 > j1) {
-                const parsed = JSON.parse(cleaned.substring(j1, j2 + 1));
-                if (parsed.answers && parsed.answers.length > 0 && parsed.answers[0].answer !== "–") {
-                  respondentResult = { id, ...parsed };
-                  break;
-                }
+      for (let b = 0; b < total; b++) {
+        const id = b + 1;
+        let respondentResult = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            // Exponential backoff: 0ms, 2s, 5s
+            if (attempt > 0) await new Promise(r => setTimeout(r, attempt === 1 ? 2000 : 5000));
+            const resp = await fetch("/api/anthropic", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1200, system: buildPrompt(id),
+                messages: [{ role: "user", content: `Befragung ${id}/${total}:\n${validQs.map((q, qi) => `F${qi + 1}: ${q}`).join("\n")}\n\nANTWORTE AUSSCHLIESSLICH MIT VALIDEM JSON. Kein Text davor oder danach.` }] }),
+            });
+            // Rate limit: wait and retry
+            if (resp.status === 429) {
+              await new Promise(r => setTimeout(r, 8000));
+              continue;
+            }
+            if (!resp.ok) continue;
+            const data = await resp.json();
+            const text = data.content?.find(c => c.type === "text")?.text || "";
+            const cleaned = text.replace(/```json|```/g, "").trim();
+            const j1 = cleaned.indexOf("{"), j2 = cleaned.lastIndexOf("}");
+            if (j1 > -1 && j2 > j1) {
+              const parsed = JSON.parse(cleaned.substring(j1, j2 + 1));
+              if (parsed.answers && parsed.answers.length > 0 && parsed.answers[0].answer && parsed.answers[0].answer !== "–") {
+                respondentResult = { id, ...parsed };
+                break;
               }
-            } catch {}
-          }
-          return respondentResult || { id, answers: validQs.map(q => ({ question: q, answer: "Keine Antwort erhalten." })), sentiment: "neutral", nps: 5 };
-        }));
-        // Recalculate sentiment from score to ensure consistency
-        const calibrated = batch.map(r => ({
-          ...r,
-          sentiment: r.nps >= 8 ? "positiv" : r.nps >= 4 ? "neutral" : "negativ"
-        }));
-        collected.push(...calibrated);
+            }
+          } catch {}
+        }
+        const result = respondentResult || { id, answers: validQs.map(q => ({ question: q, answer: "Keine Antwort erhalten." })), sentiment: "neutral", nps: 5 };
+        const calibrated = { ...result, sentiment: result.nps >= 8 ? "positiv" : result.nps >= 4 ? "neutral" : "negativ" };
+        collected.push(calibrated);
         setProgress(Math.round((collected.length / total) * 100));
         setResults([...collected]);
-        await new Promise(r => setTimeout(r, 150));
+        // Small pause between requests to avoid rate limiting
+        await new Promise(r => setTimeout(r, 300));
       }
     } catch (e) { setError("Simulation fehlgeschlagen: " + e.message); setSimulating(false); return; }
     setSimulating(false);
